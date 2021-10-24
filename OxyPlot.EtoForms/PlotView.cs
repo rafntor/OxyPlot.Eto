@@ -93,12 +93,10 @@ namespace OxyPlot.EtoForms
 			this.CanFocus = true;
 
             this.PanCursor = Cursors.Move;
-			/* TODO Implement the zoom cursors */
-			/*this.ZoomRectangleCursor = Cursors.SizeNWSE;
-            this.ZoomHorizontalCursor = Cursors.SizeWE;
-            this.ZoomVerticalCursor = Cursors.SizeNS;
-			*/
-			var DoCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
+            this.ZoomRectangleCursor = Cursors.Pointer; // WindowsForms use Cursors.SizeNWSE;
+            this.ZoomHorizontalCursor = Cursors.HorizontalSplit;
+            this.ZoomVerticalCursor = Cursors.VerticalSplit;
+         var DoCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
             this.ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, DoCopy);
 
 			this.SizeChanged += OnResize;
@@ -293,21 +291,20 @@ namespace OxyPlot.EtoForms
             switch (cursorType)
             {
 				case OxyPlot.CursorType.Pan:
-                    this.Cursor = this.PanCursor;
-                    break;
-                /* TODO Implement zoom cursor switch */
-				/*  case CursorType.ZoomRectangle:
-					  this.Cursor = this.ZoomRectangleCursor;
-					  break;
-				  case CursorType.ZoomHorizontal:
-					  this.Cursor = this.ZoomHorizontalCursor;
-					  break;
-				  case CursorType.ZoomVertical:
-					  this.Cursor = this.ZoomVerticalCursor;
-					  break;*/
+               this.Cursor = this.PanCursor;
+               break;
+				case OxyPlot.CursorType.ZoomRectangle:
+					this.Cursor = this.ZoomRectangleCursor;
+					break;
+				case OxyPlot.CursorType.ZoomHorizontal:
+					this.Cursor = this.ZoomHorizontalCursor;
+					break;
+				case OxyPlot.CursorType.ZoomVertical:
+					this.Cursor = this.ZoomVerticalCursor;
+					break;
 				default:
-                    this.Cursor = Cursors.Arrow;
-                    break;
+               this.Cursor = Cursors.Arrow;
+               break;
             }
         }
 
