@@ -446,7 +446,7 @@ namespace OxyPlot.EtoForms
                             }
                         }
 
-                        ((IPlotModel)this.model).Render(this.renderContext, this.Width, this.Height);
+                        ((IPlotModel)this.model).Render(this.renderContext, new OxyRect(0, 0, this.Width, this.Height));
                     }
 
                     if (this.zoomRectangle != Rectangle.Empty)
@@ -552,17 +552,10 @@ namespace OxyPlot.EtoForms
         /// </summary>
         private void DoCopy(IPlotView view, OxyInputEventArgs args)
         {
-            var background = this.ActualModel.Background.IsVisible() ? this.ActualModel.Background : this.ActualModel.Background;
-            if (background.IsInvisible())
-            {
-                background = OxyColors.White;
-            }
-
             var exporter = new PngExporter
             {
                 Width = this.ClientSize.Width,
                 Height = this.ClientSize.Height,
-                Background = background
             };
 
             var bitmap = exporter.ExportToBitmap(this.ActualModel);
