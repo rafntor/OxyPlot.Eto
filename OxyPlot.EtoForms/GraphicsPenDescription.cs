@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,25 +27,25 @@ namespace OxyPlot.EtoForms
 
             cachedHashCode = ComputeHashCode();
         }
-        
+
         /// <summary>
         /// Gets the color of the pen.
         /// </summary>
         /// <value>The color.</value>
         public OxyColor Color { get; }
-        
+
         /// <summary>
         /// Gets the line thickness.
         /// </summary>
         /// <value>The line thickness.</value>
         public double Thickness { get; }
-        
+
         /// <summary>
         /// Gets the dash array.
         /// </summary>
         /// <value>The dash array.</value>
         public double[] DashArray { get; }
-        
+
         /// <summary>
         /// Gets the line join type.
         /// </summary>
@@ -56,7 +56,7 @@ namespace OxyPlot.EtoForms
         /// The HashCode of the <see cref="GraphicsPenDescription" /> instance, as computed in the constructor.
         /// </summary>
         private readonly int cachedHashCode;
-        
+
         /// <summary>
         /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
         /// </summary>
@@ -72,7 +72,7 @@ namespace OxyPlot.EtoForms
                    DashArraysEquals(DashArray, description.DashArray) &&
                    LineJoin == description.LineJoin;
         }
-        
+
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
@@ -89,7 +89,7 @@ namespace OxyPlot.EtoForms
         private int ComputeHashCode()
         {
             var hashCode = 754997215;
-            
+
             unchecked
             {
                 hashCode = hashCode * -1521134295 + Color.GetHashCode();

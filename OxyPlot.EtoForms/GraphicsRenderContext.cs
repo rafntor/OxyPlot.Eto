@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="GraphicsRenderContext.cs" company="OxyPlot">
 //   Copyright (c) 2014 OxyPlot contributors
 // </copyright>
@@ -84,24 +84,24 @@ namespace OxyPlot.EtoForms
         {
             var isStroked = stroke.IsVisible() && thickness > 0;
 
-			if (fill.IsVisible())
-			{
-				if (!isStroked)
-				{
-					this.g.AntiAlias = true;
-				}
+            if (fill.IsVisible())
+            {
+                if (!isStroked)
+                {
+                    this.g.AntiAlias = true;
+                }
 
-				this.g.FillEllipse(this.GetCachedBrush(fill), (float)rect.Left, (float)rect.Top, (float)rect.Width, (float)rect.Height);
-			}
+                this.g.FillEllipse(this.GetCachedBrush(fill), (float)rect.Left, (float)rect.Top, (float)rect.Width, (float)rect.Height);
+            }
 
             if (!isStroked)
             {
                 return;
             }
-            
+
             var pen = this.GetCachedPen(stroke, thickness);
-			this.g.AntiAlias = true;
-			this.g.DrawEllipse(pen, (float)rect.Left, (float)rect.Top, (float)rect.Width, (float)rect.Height);
+            this.g.AntiAlias = true;
+            this.g.DrawEllipse(pen, (float)rect.Left, (float)rect.Top, (float)rect.Width, (float)rect.Height);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace OxyPlot.EtoForms
                 return;
             }
 
-			this.g.AntiAlias = aliased;
+            this.g.AntiAlias = aliased;
             var pen = this.GetCachedPen(stroke, thickness, dashArray, lineJoin);
             this.g.DrawLines(pen, this.ToPoints(points));
         }
@@ -155,7 +155,7 @@ namespace OxyPlot.EtoForms
                 return;
             }
 
-			this.g.AntiAlias = aliased;
+            this.g.AntiAlias = aliased;
 
             var pts = this.ToPoints(points);
             if (fill.IsVisible())
@@ -230,7 +230,7 @@ namespace OxyPlot.EtoForms
 
             using (var font = CreateFont(fontFamily, fontSize, fontStyle))
             {
-				var size = Ceiling(this.g.MeasureString(font, text));
+                var size = Ceiling(this.g.MeasureString(font, text));
                 if (maxSize != null)
                 {
                     if (size.Width > maxSize.Value.Width)
@@ -266,23 +266,23 @@ namespace OxyPlot.EtoForms
                     dy = -size.Height;
                 }
 
-				using (var graphicsState = this.g.SaveTransformState())
-				{
+                using (var graphicsState = this.g.SaveTransformState())
+                {
 
-					this.g.TranslateTransform((float)p.X, (float)p.Y);
+                    this.g.TranslateTransform((float)p.X, (float)p.Y);
 
-					var layoutRectangle = new RectangleF(0, 0, size.Width, size.Height);
-					if (Math.Abs(rotate) > double.Epsilon)
-					{
-						this.g.RotateTransform((float)rotate);
+                    var layoutRectangle = new RectangleF(0, 0, size.Width, size.Height);
+                    if (Math.Abs(rotate) > double.Epsilon)
+                    {
+                        this.g.RotateTransform((float)rotate);
 
-						layoutRectangle.Height += (float)(fontSize / 18.0);
-					}
+                        layoutRectangle.Height += (float)(fontSize / 18.0);
+                    }
 
-					this.g.TranslateTransform(dx, dy);
+                    this.g.TranslateTransform(dx, dy);
 
-					this.g.DrawText(font, this.GetCachedBrush(fill), layoutRectangle, text);
-				}
+                    this.g.DrawText(font, this.GetCachedBrush(fill), layoutRectangle, text);
+                }
             }
         }
 
@@ -304,7 +304,7 @@ namespace OxyPlot.EtoForms
             var fontStyle = fontWeight < 700 ? FontStyle.None : FontStyle.Bold;
             using (var font = CreateFont(fontFamily, fontSize, fontStyle))
             {
-				var size = this.g.MeasureString(font, text);
+                var size = this.g.MeasureString(font, text);
                 return new OxySize(size.Width, size.Height);
             }
         }
@@ -345,13 +345,13 @@ namespace OxyPlot.EtoForms
             var image = this.GetImage(source);
             if (image != null)
             {
-				/* TODO FIXME opacity not implemented */
+                /* TODO FIXME opacity not implemented */
 
-				//ImageAttributes ia = null;
+                //ImageAttributes ia = null;
                 if (opacity < 1)
                 {
-					throw new NotImplementedException("Opacity not implemented");
-					/*
+                    throw new NotImplementedException("Opacity not implemented");
+                    /*
                     var cm = new ColorMatrix
                                  {
                                      Matrix00 = 1f,
@@ -363,17 +363,17 @@ namespace OxyPlot.EtoForms
 
                     ia = new ImageAttributes();
                     ia.SetColorMatrix(cm, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                    */				
+                    */
                 }
 
-				this.g.ImageInterpolation = interpolate ? ImageInterpolation.High : ImageInterpolation.None;
+                this.g.ImageInterpolation = interpolate ? ImageInterpolation.High : ImageInterpolation.None;
                 int sx = (int)Math.Floor(x);
                 int sy = (int)Math.Floor(y);
                 int sw = (int)Math.Ceiling(x + w) - sx;
                 int sh = (int)Math.Ceiling(y + h) - sy;
                 var destRect = new Rectangle(sx, sy, sw, sh);
-				RectangleF sourceRect = new RectangleF((float)srcX - 0.5f, (float)srcY - 0.5f, (float)srcWidth, (float)srcHeight);
-				this.g.DrawImage(image, sourceRect, destRect);
+                RectangleF sourceRect = new RectangleF((float)srcX - 0.5f, (float)srcY - 0.5f, (float)srcWidth, (float)srcHeight);
+                this.g.DrawImage(image, sourceRect, destRect);
                 //this.g.DrawImage(image, destRect, (float)srcX - 0.5f, (float)srcY - 0.5f, (float)srcWidth, (float)srcHeight, GraphicsUnit.Pixel, ia);
             }
         }
@@ -433,9 +433,9 @@ namespace OxyPlot.EtoForms
         /// <returns>A font</returns>
         private static Font CreateFont(string fontFamily, double fontSize, FontStyle fontStyle)
         {
-			if (fontFamily == null) { Font f = Fonts.Sans((float)(fontSize * FontsizeFactor)); return new Font(f.Family, (float)(fontSize * FontsizeFactor)); }
+            if (fontFamily == null) { Font f = Fonts.Sans((float)(fontSize * FontsizeFactor)); return new Font(f.Family, (float)(fontSize * FontsizeFactor)); }
 
-			return new Font(fontFamily, (float)fontSize * FontsizeFactor, fontStyle);
+            return new Font(fontFamily, (float)fontSize * FontsizeFactor, fontStyle);
         }
 
         /// <summary>
@@ -472,7 +472,7 @@ namespace OxyPlot.EtoForms
                 return src;
             }
 
-			Image btm = new Bitmap(source.GetData());
+            Image btm = new Bitmap(source.GetData());
 
             this.imageCache.Add(source, btm);
             return btm;
@@ -491,7 +491,7 @@ namespace OxyPlot.EtoForms
                 return brush;
             }
 
-			return this.brushes[fill] = new SolidBrush(fill.ToEto());
+            return this.brushes[fill] = new SolidBrush(fill.ToEto());
         }
 
         /// <summary>
@@ -529,18 +529,18 @@ namespace OxyPlot.EtoForms
 
             if (dashArray != null)
             {
-				pen.DashStyle = new DashStyle(0, this.ToFloatArray(dashArray));
+                pen.DashStyle = new DashStyle(0, this.ToFloatArray(dashArray));
             }
 
             switch (lineJoin)
             {
                 case OxyPlot.LineJoin.Round:
-					pen.LineJoin = PenLineJoin.Round;
+                    pen.LineJoin = PenLineJoin.Round;
                     break;
                 case OxyPlot.LineJoin.Bevel:
-					pen.LineJoin = PenLineJoin.Bevel;
+                    pen.LineJoin = PenLineJoin.Bevel;
                     break;
-                // The default LineJoin is Miter
+                    // The default LineJoin is Miter
             }
 
             return pen;

@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="PlotModelExtensions.cs" company="OxyPlot">
 //   Copyright (c) 2014 OxyPlot contributors
 // </copyright>
@@ -27,14 +27,14 @@ namespace OxyPlot.EtoForms
         /// <returns>A <see cref="string" />.</returns>
         public static string ToSvg(this PlotModel model, double width, double height, bool isDocument)
         {
-			/* TODO Why is this needed at all? */
-			using (var g = new Graphics(new Bitmap(1, 1, PixelFormat.Format32bppRgba)))
-			{
-				using (var rc = new GraphicsRenderContext(g) { RendersToScreen = false })
-				{
-					return OxyPlot.SvgExporter.ExportToString(model, width, height, isDocument, rc);
-				}
-			}
+            /* TODO Why is this needed at all? */
+            using (var g = new Graphics(new Bitmap(1, 1, PixelFormat.Format32bppRgba)))
+            {
+                using (var rc = new GraphicsRenderContext(g) { RendersToScreen = false })
+                {
+                    return OxyPlot.SvgExporter.ExportToString(model, width, height, isDocument, rc);
+                }
+            }
         }
     }
 }

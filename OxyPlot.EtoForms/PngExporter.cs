@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="PngExporter.cs" company="OxyPlot">
 //   Copyright (c) 2014 OxyPlot contributors
 // </copyright>
@@ -79,7 +79,7 @@ namespace OxyPlot.EtoForms
                 bm.Save(stream, ImageFormat.Png);
             }
         }
-        
+
         /// <summary>
         /// Exports the specified <see cref="PlotModel" /> to a <see cref="Bitmap" />.
         /// </summary>
@@ -90,10 +90,10 @@ namespace OxyPlot.EtoForms
             var bm = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppRgba);
             using (var g = new Graphics(bm))
             {
-				if (this.Background.IsVisible())
-				{
-					g.FillRectangle(this.Background.ToEto(), 0, 0, this.Width, this.Height);
-				}
+                if (this.Background.IsVisible())
+                {
+                    g.FillRectangle(this.Background.ToEto(), 0, 0, this.Width, this.Height);
+                }
 
                 using (var rc = new GraphicsRenderContext(g) { RendersToScreen = false })
                 {
@@ -101,7 +101,7 @@ namespace OxyPlot.EtoForms
                     model.Render(rc, this.Width, this.Height);
                 }
 
-				return bm;
+                return bm;
             }
         }
     }

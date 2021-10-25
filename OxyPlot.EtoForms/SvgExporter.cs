@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="SvgExporter.cs" company="OxyPlot">
 //   Copyright (c) 2014 OxyPlot contributors
 // </copyright>
@@ -32,8 +32,8 @@ namespace OxyPlot.EtoForms
         /// </summary>
         public SvgExporter()
         {
-			/* TODO Why is this needed at all? */
-			this.g = new Graphics(new Bitmap(1, 1, PixelFormat.Format32bppRgba));
+            /* TODO Why is this needed at all? */
+            this.g = new Graphics(new Bitmap(1, 1, PixelFormat.Format32bppRgba));
             this.TextMeasurer = this.grc = new GraphicsRenderContext(this.g);
         }
 

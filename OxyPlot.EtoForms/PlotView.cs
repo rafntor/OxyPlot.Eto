@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="PlotView.cs" company="OxyPlot">
 //   Copyright (c) 2014 OxyPlot contributors
 // </copyright>
@@ -90,18 +90,18 @@ namespace OxyPlot.EtoForms
         public PlotView()
         {
             this.renderContext = new GraphicsRenderContext();
-			this.CanFocus = true;
+            this.CanFocus = true;
 
             this.PanCursor = Cursors.Move;
             this.ZoomRectangleCursor = Cursors.Pointer; // WindowsForms use Cursors.SizeNWSE;
             this.ZoomHorizontalCursor = Cursors.HorizontalSplit;
             this.ZoomVerticalCursor = Cursors.VerticalSplit;
-         var DoCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
+            var DoCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
             this.ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, DoCopy);
 
-			this.SizeChanged += OnResize;
-			this.MouseEnter += OnMouseEnter;
-			this.KeyDown += OnPreviewKeyDown;
+            this.SizeChanged += OnResize;
+            this.MouseEnter += OnMouseEnter;
+            this.KeyDown += OnPreviewKeyDown;
         }
 
         /// <summary>
@@ -151,8 +151,8 @@ namespace OxyPlot.EtoForms
         {
             get
             {
-				//return new OxyRect(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.ClientRectangle.Height);
-				return new OxyRect(0, 0, this.ClientSize.Width, this.ClientSize.Height);
+                //return new OxyRect(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.ClientRectangle.Height);
+                return new OxyRect(0, 0, this.ClientSize.Width, this.ClientSize.Height);
             }
         }
 
@@ -290,21 +290,21 @@ namespace OxyPlot.EtoForms
         {
             switch (cursorType)
             {
-				case OxyPlot.CursorType.Pan:
-               this.Cursor = this.PanCursor;
-               break;
-				case OxyPlot.CursorType.ZoomRectangle:
-					this.Cursor = this.ZoomRectangleCursor;
-					break;
-				case OxyPlot.CursorType.ZoomHorizontal:
-					this.Cursor = this.ZoomHorizontalCursor;
-					break;
-				case OxyPlot.CursorType.ZoomVertical:
-					this.Cursor = this.ZoomVerticalCursor;
-					break;
-				default:
-               this.Cursor = Cursors.Arrow;
-               break;
+                case OxyPlot.CursorType.Pan:
+                    this.Cursor = this.PanCursor;
+                    break;
+                case OxyPlot.CursorType.ZoomRectangle:
+                    this.Cursor = this.ZoomRectangleCursor;
+                    break;
+                case OxyPlot.CursorType.ZoomHorizontal:
+                    this.Cursor = this.ZoomHorizontalCursor;
+                    break;
+                case OxyPlot.CursorType.ZoomVertical:
+                    this.Cursor = this.ZoomVerticalCursor;
+                    break;
+                default:
+                    this.Cursor = Cursors.Arrow;
+                    break;
             }
         }
 
@@ -314,7 +314,7 @@ namespace OxyPlot.EtoForms
         /// <param name="data">The data.</param>
         public void ShowTracker(TrackerHitResult data)
         {
-			ToolTip = data.ToString();
+            ToolTip = data.ToString();
         }
 
         /// <summary>
@@ -335,9 +335,9 @@ namespace OxyPlot.EtoForms
         {
             try
             {
-				// todo: can't get the following solution to work
-				// http://stackoverflow.com/questions/5707990/requested-clipboard-operation-did-not-succeed
-				Clipboard.Instance.Text = text;
+                // todo: can't get the following solution to work
+                // http://stackoverflow.com/questions/5707990/requested-clipboard-operation-did-not-succeed
+                Clipboard.Instance.Text = text;
             }
             catch (ExternalException ee)
             {
@@ -351,22 +351,22 @@ namespace OxyPlot.EtoForms
         /// </summary>
         /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs" /> that contains the event data.</param>
         protected override void OnMouseDown(MouseEventArgs e)
-		{
-			base.OnMouseDown(e);
+        {
+            base.OnMouseDown(e);
 
-			this.Focus();
-			this.ActualController.HandleMouseDown(this, e.ToMouseDownEventArgs(GetModifiers(), this));
-		}
+            this.Focus();
+            this.ActualController.HandleMouseDown(this, e.ToMouseDownEventArgs(GetModifiers(), this));
+        }
 
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Control.MouseMove" /> event.
-		/// </summary>
-		/// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs" /> that contains the event data.</param>
-		protected override void OnMouseMove(MouseEventArgs e)
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Forms.Control.MouseMove" /> event.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs" /> that contains the event data.</param>
+        protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
 
-			this.ActualController.HandleMouseMove(this, e.ToMouseEventArgs(GetModifiers(), this));
+            this.ActualController.HandleMouseMove(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -376,9 +376,9 @@ namespace OxyPlot.EtoForms
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-			/* TODO Is this relevant? */
-			//this.Capture = false;
-			this.ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
+            /* TODO Is this relevant? */
+            //this.Capture = false;
+            this.ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -387,7 +387,7 @@ namespace OxyPlot.EtoForms
         /// <param name="e">An <see cref="T:System.EventArgs" /> that contains the event data.</param>
         protected void OnMouseEnter(object sender, MouseEventArgs e)
         {
-			this.ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(GetModifiers(), this));
+            this.ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -451,14 +451,14 @@ namespace OxyPlot.EtoForms
 
                     if (this.zoomRectangle != Rectangle.Empty)
                     {
-						using (var zoomBrush = new SolidBrush(Color.FromArgb(0x40, 0xFF, 0xFF, 0x00)))
-						using (var zoomPen = new Pen(Color.FromArgb(0, 0, 0)))
-						{
-							zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
-							//zoomPen.DashPattern = new float[] { 3, 1 };
-							e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
-							e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
-						}
+                        using (var zoomBrush = new SolidBrush(Color.FromArgb(0x40, 0xFF, 0xFF, 0x00)))
+                        using (var zoomPen = new Pen(Color.FromArgb(0, 0, 0)))
+                        {
+                            zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
+                            //zoomPen.DashPattern = new float[] { 3, 1 };
+                            e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
+                            e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
+                        }
                     }
                 }
             }
@@ -467,26 +467,26 @@ namespace OxyPlot.EtoForms
                 var trace = new StackTrace(paintException);
                 Debug.WriteLine(paintException);
                 Debug.WriteLine(trace);
-				var font = Fonts.Monospace(10);
-				{
-					//e.Graphics.RestoreTransform();
-					e.Graphics.DrawText(font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, "OxyPlot paint exception: " + paintException.Message);
-					//    e.Graphics.DrawString(
-					//      "OxyPlot paint exception: " + paintException.Message, font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-				}
+                var font = Fonts.Monospace(10);
+                {
+                    //e.Graphics.RestoreTransform();
+                    e.Graphics.DrawText(font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, "OxyPlot paint exception: " + paintException.Message);
+                    //    e.Graphics.DrawString(
+                    //      "OxyPlot paint exception: " + paintException.Message, font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+                }
             }
         }
 
 
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Control.PreviewKeyDown" /> event.
-		/// </summary>
-		/// <param name="e">A <see cref="T:System.Windows.Forms.PreviewKeyDownEventArgs" /> that contains the event data.</param>
-		protected void OnPreviewKeyDown(object sender, KeyEventArgs e)
-		{
-			var args = new OxyKeyEventArgs { ModifierKeys = GetModifiers(), Key = e.Key.Convert() };
-			this.ActualController.HandleKeyDown(this, args);
-		}
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Forms.Control.PreviewKeyDown" /> event.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.PreviewKeyDownEventArgs" /> that contains the event data.</param>
+        protected void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var args = new OxyKeyEventArgs { ModifierKeys = GetModifiers(), Key = e.Key.Convert() };
+            this.ActualController.HandleKeyDown(this, args);
+        }
 
         /// <summary>
         /// Raises the <see cref="E:System.Windows.Forms.Control.Resize" /> event.
@@ -566,7 +566,7 @@ namespace OxyPlot.EtoForms
             };
 
             var bitmap = exporter.ExportToBitmap(this.ActualModel);
-			Clipboard.Instance.Image = bitmap;
+            Clipboard.Instance.Image = bitmap;
         }
-	}
+    }
 }
