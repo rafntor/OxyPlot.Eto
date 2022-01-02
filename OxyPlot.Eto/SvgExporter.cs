@@ -7,10 +7,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.EtoForms
+namespace OxyPlot.Eto
 {
     using System;
-    using Eto.Drawing;
+    using global::Eto.Drawing;
 
     /// <summary>
     /// Provides functionality to export plots to scalable vector graphics using <see cref="Graphics" /> for text measuring.

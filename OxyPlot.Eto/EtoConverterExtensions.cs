@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EtoFormsConverterExtensions.cs" company="OxyPlot">
+// <copyright file="EtoConverterExtensions.cs" company="OxyPlot">
 //   Copyright (c) 2014 OxyPlot contributors
 // </copyright>
 // <summary>
@@ -7,15 +7,15 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.EtoForms
+namespace OxyPlot.Eto
 {
-    using System;
-    using Eto.Forms;
+    using global::Eto.Forms;
+    using global::Eto.Drawing;
 
     /// <summary>
-    /// Extension method used to convert to/from EtoForms classes.
+    /// Extension method used to convert to/from Eto classes.
     /// </summary>
-    public static class EtoFormsConverterExtensions
+    public static class EtoConverterExtensions
     {
         /// <summary>
         /// Converts a <see cref="MouseButtons" /> to a <see cref="OxyMouseButton" />.
@@ -278,7 +278,7 @@ namespace OxyPlot.EtoForms
             }
         }
 
-        public static ScreenPoint ToScreenPoint(this Eto.Drawing.PointF ControlPoint, Control c)
+        public static ScreenPoint ToScreenPoint(this PointF ControlPoint, Control c)
         {
             var scrpoint = ControlPoint;// c.PointToScreen(ControlPoint);
             return new ScreenPoint(scrpoint.X, scrpoint.Y);

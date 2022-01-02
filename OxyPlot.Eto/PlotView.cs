@@ -7,14 +7,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.EtoForms
+namespace OxyPlot.Eto
 {
     using System;
-    using System.ComponentModel;
     using System.Diagnostics;
-    using Eto.Drawing;
+    using System.ComponentModel;
     using System.Runtime.InteropServices;
-    using Eto.Forms;
+    using global::Eto.Drawing;
+    using global::Eto.Forms;
 
     /// <summary>
     /// Represents a control that displays a <see cref="PlotModel" />.

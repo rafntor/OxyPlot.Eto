@@ -7,10 +7,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.EtoForms
+namespace OxyPlot.Eto
 {
-    using Eto.Drawing;
-    //using System.Drawing.Imaging;
+    using global::Eto.Drawing;
     using System.IO;
 
     /// <summary>

@@ -7,10 +7,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.EtoForms
+namespace OxyPlot.Eto
 {
     using System;
-    using Eto.Drawing;
+    using global::Eto.Drawing;
 
     /// <summary>
     /// Provides extension methods to the <see cref="PlotModel" />.

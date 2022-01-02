@@ -28,8 +28,8 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: nuget
-        path: OxyPlot.EtoForms/bin/Release/*.nupkg
+        path: OxyPlot.Eto/bin/Release/*.nupkg
 
     - name: Push to nuget.org
       if: (github.ref == 'refs/heads/master')
-      run: dotnet nuget push 'OxyPlot.EtoForms/bin/Release/*.nupkg' --skip-duplicate -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}}
+      run: dotnet nuget push 'OxyPlot.Eto/bin/Release/*.nupkg' --skip-duplicate -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}}

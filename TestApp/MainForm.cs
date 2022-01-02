@@ -1,7 +1,7 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using OxyPlot.EtoForms;
+using OxyPlot.Eto;
 using Eto.Forms;
 using System.Linq;
 using System;

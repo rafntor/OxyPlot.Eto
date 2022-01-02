@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OxyPlot.EtoForms\OxyPlot.EtoForms.csproj" />
+    <ProjectReference Include="..\OxyPlot.Eto\OxyPlot.Eto.csproj" />
   </ItemGroup>
 
 </Project>

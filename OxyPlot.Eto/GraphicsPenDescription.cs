@@ -1,5 +1,5 @@
 
-namespace OxyPlot.EtoForms
+namespace OxyPlot.Eto
 {
     using System;
     using System.Collections.Generic;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -8,12 +8,12 @@
     <PackageIconUrl />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://oxyplot.github.io/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/rafntor/OxyPlot.EtoForms</RepositoryUrl>
+    <RepositoryUrl>https://github.com/rafntor/OxyPlot.Eto</RepositoryUrl>
     <PackageTags>OxyPlot Eto.Forms plotting plot charting chart</PackageTags>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright (c) 2014 OxyPlot contributors, Copyright (c) 2021 mostanes</Copyright>
-    <Authors>OxyPlot contributors</Authors>
+    <Copyright>Copyright (c) 2014 OxyPlot contributors, 2021 mostanes, 2021 rafntor</Copyright>
+    <Authors>OxyPlot contributors, rafntor</Authors>
     <Company></Company>
     <Product />
   </PropertyGroup>

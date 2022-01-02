@@ -7,11 +7,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.EtoForms
+namespace OxyPlot.Eto
 {
     using System;
     using System.Collections.Generic;
-    using Eto.Drawing;
+    using global::Eto.Drawing;
     /*using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
     using System.Drawing.Text;*/
