@@ -13,14 +13,21 @@ namespace TestApp
 		public MainForm()
 		{
 			InitializeComponent();
+			Menu = null;
 
-			var pv = new PlotView();
+			this.Title = "My Eto Form";
+
+			var myModel = new PlotModel { Title = "Example 1" };
+			myModel.Series.Add(new FunctionSeries(Math.Cos, 0, 10, 0.1, "cos(x)"));
+			var plotView = new PlotView() { Model = myModel };
+
+			this.Content = plotView;
 
 			this.MouseUp += (s, e) => 
 			{ 
-				pv.Model = BuildPlotModel();
+				plotView.Model = BuildPlotModel();
 
-				Content = pv;
+				Content = plotView;
 			};
 		}
 
