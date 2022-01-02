@@ -26,7 +26,6 @@ namespace OxyPlot.EtoForms
             this.Width = 700;
             this.Height = 400;
             this.Resolution = 96;
-            this.Background = OxyColors.White;
         }
 
         /// <summary>
@@ -45,11 +44,6 @@ namespace OxyPlot.EtoForms
         public double Resolution { get; set; }
 
         /// <summary>
-        /// Gets or sets the background color.
-        /// </summary>
-        public OxyColor Background { get; set; }
-
-        /// <summary>
         /// Exports the specified model.
         /// </summary>
         /// <param name="model">The model.</param>
@@ -58,9 +52,9 @@ namespace OxyPlot.EtoForms
         /// <param name="height">The height.</param>
         /// <param name="background">The background.</param>
         /// <param name="resolution">The resolution.</param>
-        public static void Export(IPlotModel model, string fileName, int width, int height, OxyColor background, double resolution = 96)
+        public static void Export(IPlotModel model, string fileName, int width, int height, double resolution = 96)
         {
-            var exporter = new PngExporter { Width = width, Height = height, Background = background, Resolution = resolution };
+            var exporter = new PngExporter { Width = width, Height = height, Resolution = resolution };
             using (var stream = File.Create(fileName))
             {
                 exporter.Export(model, stream);
@@ -90,15 +84,15 @@ namespace OxyPlot.EtoForms
             var bm = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppRgba);
             using (var g = new Graphics(bm))
             {
-                if (this.Background.IsVisible())
+                if (model.Background.IsVisible())
                 {
-                    g.FillRectangle(this.Background.ToEto(), 0, 0, this.Width, this.Height);
+                    g.FillRectangle(model.Background.ToEto(), 0, 0, this.Width, this.Height);
                 }
 
                 using (var rc = new GraphicsRenderContext(g) { RendersToScreen = false })
                 {
                     model.Update(true);
-                    model.Render(rc, this.Width, this.Height);
+                    model.Render(rc, new OxyRect(0, 0, this.Width, this.Height));
                 }
 
                 return bm;

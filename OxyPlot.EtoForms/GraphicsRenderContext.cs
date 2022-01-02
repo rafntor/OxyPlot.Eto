@@ -23,7 +23,7 @@ namespace OxyPlot.EtoForms
     /// <summary>
     /// The graphics render context.
     /// </summary>
-    public class GraphicsRenderContext : RenderContextBase, IDisposable
+    public class GraphicsRenderContext : ClippingRenderContext, IDisposable
     {
         /// <summary>
         /// The font size factor.
@@ -73,24 +73,15 @@ namespace OxyPlot.EtoForms
             this.g = graphics;
         }
 
-        /// <summary>
-        /// Draws an ellipse.
-        /// </summary>
-        /// <param name="rect">The rectangle.</param>
-        /// <param name="fill">The fill color.</param>
-        /// <param name="stroke">The stroke color.</param>
-        /// <param name="thickness">The thickness.</param>
-        public override void DrawEllipse(OxyRect rect, OxyColor fill, OxyColor stroke, double thickness)
+        /// <inheritdoc/>
+        public override void DrawEllipse(OxyRect rect, OxyColor fill, OxyColor stroke, double thickness, EdgeRenderingMode edgeRenderingMode)
         {
             var isStroked = stroke.IsVisible() && thickness > 0;
 
+            this.SetSmoothingMode(this.ShouldUseAntiAliasingForEllipse(edgeRenderingMode));
+
             if (fill.IsVisible())
             {
-                if (!isStroked)
-                {
-                    this.g.AntiAlias = true;
-                }
-
                 this.g.FillEllipse(this.GetCachedBrush(fill), (float)rect.Left, (float)rect.Top, (float)rect.Width, (float)rect.Height);
             }
 
@@ -100,62 +91,45 @@ namespace OxyPlot.EtoForms
             }
 
             var pen = this.GetCachedPen(stroke, thickness);
-            this.g.AntiAlias = true;
             this.g.DrawEllipse(pen, (float)rect.Left, (float)rect.Top, (float)rect.Width, (float)rect.Height);
         }
 
-        /// <summary>
-        /// Draws the polyline from the specified points.
-        /// </summary>
-        /// <param name="points">The points.</param>
-        /// <param name="stroke">The stroke color.</param>
-        /// <param name="thickness">The stroke thickness.</param>
-        /// <param name="dashArray">The dash array.</param>
-        /// <param name="lineJoin">The line join type.</param>
-        /// <param name="aliased">if set to <c>true</c> the shape will be aliased.</param>
+        /// <inheritdoc/>
         public override void DrawLine(
             IList<ScreenPoint> points,
             OxyColor stroke,
             double thickness,
+            EdgeRenderingMode edgeRenderingMode,
             double[] dashArray,
-            OxyPlot.LineJoin lineJoin,
-            bool aliased)
+            OxyPlot.LineJoin lineJoin)
         {
             if (stroke.IsInvisible() || thickness <= 0 || points.Count < 2)
             {
                 return;
             }
 
-            this.g.AntiAlias = aliased;
+            this.SetSmoothingMode(this.ShouldUseAntiAliasingForLine(edgeRenderingMode, points));
+
             var pen = this.GetCachedPen(stroke, thickness, dashArray, lineJoin);
             this.g.DrawLines(pen, this.ToPoints(points));
         }
 
-        /// <summary>
-        /// Draws the polygon from the specified points. The polygon can have stroke and/or fill.
-        /// </summary>
-        /// <param name="points">The points.</param>
-        /// <param name="fill">The fill color.</param>
-        /// <param name="stroke">The stroke color.</param>
-        /// <param name="thickness">The stroke thickness.</param>
-        /// <param name="dashArray">The dash array.</param>
-        /// <param name="lineJoin">The line join type.</param>
-        /// <param name="aliased">if set to <c>true</c> the shape will be aliased.</param>
+        /// <inheritdoc/>
         public override void DrawPolygon(
             IList<ScreenPoint> points,
             OxyColor fill,
             OxyColor stroke,
             double thickness,
+            EdgeRenderingMode edgeRenderingMode,
             double[] dashArray,
-            OxyPlot.LineJoin lineJoin,
-            bool aliased)
+            OxyPlot.LineJoin lineJoin)
         {
             if (points.Count < 2)
             {
                 return;
             }
 
-            this.g.AntiAlias = aliased;
+            this.SetSmoothingMode(this.ShouldUseAntiAliasingForLine(edgeRenderingMode, points));
 
             var pts = this.ToPoints(points);
             if (fill.IsVisible())
@@ -172,15 +146,11 @@ namespace OxyPlot.EtoForms
             this.g.DrawPolygon(pen, pts);
         }
 
-        /// <summary>
-        /// Draws the rectangle.
-        /// </summary>
-        /// <param name="rect">The rectangle.</param>
-        /// <param name="fill">The fill color.</param>
-        /// <param name="stroke">The stroke color.</param>
-        /// <param name="thickness">The stroke thickness.</param>
-        public override void DrawRectangle(OxyRect rect, OxyColor fill, OxyColor stroke, double thickness)
+        /// <inheritdoc/>
+        public override void DrawRectangle(OxyRect rect, OxyColor fill, OxyColor stroke, double thickness, EdgeRenderingMode edgeRenderingMode)
         {
+            this.SetSmoothingMode(this.ShouldUseAntiAliasingForRect(edgeRenderingMode));
+
             if (fill.IsVisible())
             {
                 this.g.FillRectangle(
@@ -304,7 +274,7 @@ namespace OxyPlot.EtoForms
             var fontStyle = fontWeight < 700 ? FontStyle.None : FontStyle.Bold;
             using (var font = CreateFont(fontFamily, fontSize, fontStyle))
             {
-                var size = this.g.MeasureString(font, text);
+                var size = Ceiling(this.g.MeasureString(font, text));
                 return new OxySize(size.Width, size.Height);
             }
         }
@@ -357,8 +327,8 @@ namespace OxyPlot.EtoForms
                                      Matrix00 = 1f,
                                      Matrix11 = 1f,
                                      Matrix22 = 1f,
-                                     Matrix33 = 1f,
-                                     Matrix44 = (float)opacity
+                                     Matrix33 = (float)opacity,
+                                     Matrix44 = 1f
                                  };
 
                     ia = new ImageAttributes();
@@ -378,21 +348,14 @@ namespace OxyPlot.EtoForms
             }
         }
 
-        /// <summary>
-        /// Sets the clip rectangle.
-        /// </summary>
-        /// <param name="rect">The clip rectangle.</param>
-        /// <returns>True if the clip rectangle was set.</returns>
-        public override bool SetClip(OxyRect rect)
+        /// <inheritdoc/>
+        protected override void SetClip(OxyRect rect)
         {
             this.g.SetClip(rect.ToRect());
-            return true;
         }
 
-        /// <summary>
-        /// Resets the clip rectangle.
-        /// </summary>
-        public override void ResetClip()
+        /// <inheritdoc/>
+        protected override void ResetClip()
         {
             this.g.ResetClip();
         }
@@ -544,6 +507,15 @@ namespace OxyPlot.EtoForms
             }
 
             return pen;
+        }
+
+        /// <summary>
+        /// Sets the smoothing mode.
+        /// </summary>
+        /// <param name="useAntiAliasing">A value indicating whether to use Anti-Aliasing.</param>
+        private void SetSmoothingMode(bool useAntiAliasing)
+        {
+            this.g.AntiAlias = useAntiAliasing;
         }
 
         /// <summary>
