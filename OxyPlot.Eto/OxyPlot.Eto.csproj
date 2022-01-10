@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageLicenseFile></PackageLicenseFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>OxyPlot plotting library for Eto.Forms</Description>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl />
@@ -11,9 +11,9 @@
     <RepositoryUrl>https://github.com/rafntor/OxyPlot.Eto</RepositoryUrl>
     <PackageTags>OxyPlot Eto.Forms plotting plot charting chart</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright (c) 2014 OxyPlot contributors, 2021 mostanes, 2021 rafntor</Copyright>
-    <Authors>OxyPlot contributors, rafntor</Authors>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <Copyright>Copyright © 2014 OxyPlot contributors, 2021 mostanes, 2021 rafntor</Copyright>
+    <Authors>OxyPlot contributors</Authors>
     <Company></Company>
     <Product />
   </PropertyGroup>
@@ -28,6 +28,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <None Include="icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
