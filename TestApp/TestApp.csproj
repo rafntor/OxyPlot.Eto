@@ -1,4 +1,4 @@
-<Project Sdk="Eto.Forms/2.5.11">
+﻿<Project Sdk="Eto.Forms/2.6.0">
 
   <!--
     Set the BuildPlatform property to the Eto platform you wish to build for.
@@ -7,8 +7,8 @@
   -->
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-
+    <TargetFramework>net6.0</TargetFramework>
+    <IncludeNativeLibrariesForSelfExtract Condition="'$(RuntimeIdentifier)'=='win-x64'">true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>

@@ -10,7 +10,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -18,10 +18,14 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
 
     - name: Build
-      run: dotnet build -c Release
+      run: |
+        dotnet build -c Release OxyPlot.Eto
+        dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained TestApp
+        dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained TestApp
+        dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained TestApp
     
     - name: Upload nuget artifacts
       uses: actions/upload-artifact@v2
@@ -29,6 +33,15 @@ jobs:
         name: nuget
         path: OxyPlot.Eto/bin/Release/*.nupkg
 
+    - name: Upload TestApp artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: testapp
+        path: | 
+            TestApp/bin/Gtk/Debug/net6.0/linux-x64/publish/TestApp
+            TestApp/bin/Mac64/Debug/net6.0/osx-x64/publish/TestApp.app/**/*
+            TestApp/bin/Wpf/Debug/net6.0-windows/win-x64/publish/TestApp.exe
+
     - name: Push to nuget.org
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
-      run: dotnet nuget push 'OxyPlot.Eto/bin/Release/*.nupkg' --skip-duplicate -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}}
+      run: dotnet nuget push '.\OxyPlot.Eto\bin\Release\*.nupkg' --skip-duplicate -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}}
