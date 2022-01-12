@@ -17,7 +17,7 @@ namespace TestApp
 
 			this.Title = "My Eto Form";
 
-			var myModel = new PlotModel { Title = "Example 1" };
+			var myModel = new PlotModel { Title = "Example 1", DefaultFont = Eto.Drawing.FontFamilies.Sans.Name };
 			myModel.Series.Add(new FunctionSeries(Math.Cos, 0, 10, 0.1, "cos(x)"));
 			var plotView = new PlotView() { Model = myModel };
 
