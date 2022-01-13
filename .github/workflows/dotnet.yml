@@ -29,6 +29,7 @@ jobs:
           -Dsonar.organization=rafntor
           -Dsonar.projectKey=rafntor_OxyPlot.Eto
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     - name: Build
