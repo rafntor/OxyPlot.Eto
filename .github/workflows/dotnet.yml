@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -20,9 +21,6 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    - name: SonarCloud Scan
-      uses: ./.github/workflows/sonarcloud
-
     - name: Build
       run: |
         dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained TestApp
@@ -39,6 +37,14 @@ jobs:
       with:
         name: TestApp.Gtk
         path: TestApp/bin/Gtk/Debug/net6.0/linux-x64/publish/TestApp
+
+  sonar-scan:
+    uses: rafntor/OxyPlot.Eto/.github/workflows/sonarscan.yml@analyze
+    with:
+        PROJECT_KEY: "rafntor_OxyPlot.EtoForms"
+        ORGANIZATION: "rafntor"
+    secrets:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build-windows:
 
