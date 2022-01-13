@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -19,6 +20,16 @@ jobs:
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
+
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      with:
+        projectBaseDir: ./OxyPlot.Eto
+        args: |
+          -Dsonar.organization=rafntor
+          -Dsonar.projectKey=rafntor_OxyPlot.Eto
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     - name: Build
       run: |
