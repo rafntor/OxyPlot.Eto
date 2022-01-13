@@ -20,6 +20,9 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
+    - name: SonarCloud Scan
+      uses: ./.github/workflows/sonarcloud
+
     - name: Build
       run: |
         dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained TestApp
