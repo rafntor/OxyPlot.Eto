@@ -1,5 +1,5 @@
 
-name: CI
+name: build
 
 on:
   push:
@@ -21,22 +21,21 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@master
+    - name: Build # SonarScan locks some files and breaks Build if done first
+      run: |
+        dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained TestApp
+        dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained TestApp
+
+    - name: SonarScanner # for .NET 6 with pull request decoration support
+      uses: highbyte/sonarscan-dotnet@v2.1.2
       with:
-        projectBaseDir: ./OxyPlot.Eto
-        args: |
-          -Dsonar.organization=rafntor
-          -Dsonar.projectKey=rafntor_OxyPlot.Eto
+        sonarProjectKey: rafntor_OxyPlot.Eto
+        sonarProjectName: OxyPlot.Eto
+        sonarOrganization: rafntor
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-    - name: Build
-      run: |
-        dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained TestApp
-        dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained TestApp
-    
     - name: Upload TestApp.Mac artifacts
       uses: actions/upload-artifact@v2
       with:

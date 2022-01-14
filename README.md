@@ -1,6 +1,7 @@
 # OxyPlot.Eto
 
 [![Build](https://github.com/rafntor/OxyPlot.Eto/actions/workflows/dotnet.yml/badge.svg)](https://github.com/rafntor/OxyPlot.Eto/actions/workflows/dotnet.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rafntor_OxyPlot.Eto&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=rafntor_OxyPlot.Eto)
 [![NuGet](http://img.shields.io/nuget/v/OxyPlot.Eto.svg)](https://www.nuget.org/packages/OxyPlot.Eto/)
 [![License](https://img.shields.io/github/license/rafntor/OxyPlot.Eto)](LICENSE)
 
