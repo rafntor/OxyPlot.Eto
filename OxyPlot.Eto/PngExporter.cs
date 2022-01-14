@@ -9,8 +9,8 @@
 
 namespace OxyPlot.Eto
 {
-    using global::Eto.Drawing;
     using System.IO;
+    using global::Eto.Drawing;
 
     /// <summary>
     /// Provides functionality to export plots to png.

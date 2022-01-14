@@ -9,39 +9,14 @@
 
 namespace OxyPlot.Eto
 {
-    using global::Eto.Forms;
     using global::Eto.Drawing;
+    using global::Eto.Forms;
 
     /// <summary>
     /// Extension method used to convert to/from Eto classes.
     /// </summary>
     public static class EtoConverterExtensions
     {
-        /// <summary>
-        /// Converts a <see cref="MouseButtons" /> to a <see cref="OxyMouseButton" />.
-        /// </summary>
-        /// <param name="button">The button to convert.</param>
-        /// <returns>The converted mouse button.</returns>
-        public static OxyMouseButton Convert(this MouseButtons button)
-        {
-            switch (button)
-            {
-                case MouseButtons.Primary:
-                    return OxyMouseButton.Left;
-                case MouseButtons.Middle:
-                    return OxyMouseButton.Middle;
-                case MouseButtons.Alternate:
-                    return OxyMouseButton.Right;
-                    /*
-				case MouseButtons.XButton1:
-					return OxyMouseButton.XButton1;
-				case MouseButtons.XButton2:
-					return OxyMouseButton.XButton2;*/
-            }
-
-            return OxyMouseButton.None;
-        }
-
         /// <summary>
         /// Converts <see cref="MouseEventArgs" /> to <see cref="OxyMouseWheelEventArgs" /> for a mouse wheel event.
         /// </summary>
@@ -54,7 +29,7 @@ namespace OxyPlot.Eto
             {
                 Position = e.Location.ToScreenPoint(c),
                 ModifierKeys = modifiers,
-                Delta = (int)(e.Delta.Height + e.Delta.Width)
+                Delta = (int)(e.Delta.Height + e.Delta.Width),
             };
         }
 
@@ -71,7 +46,7 @@ namespace OxyPlot.Eto
                 ChangedButton = e.Buttons.Convert(),
                 /* TODO FIXME implement this feature */
                 ClickCount = 1,
-                //ClickCount = e.Clicks,
+                /* ClickCount = e.Clicks */
                 Position = e.Location.ToScreenPoint(c),
                 ModifierKeys = modifiers
             };
@@ -88,7 +63,7 @@ namespace OxyPlot.Eto
             return new OxyMouseEventArgs
             {
                 Position = e.Location.ToScreenPoint(c),
-                ModifierKeys = modifiers
+                ModifierKeys = modifiers,
             };
         }
 
@@ -103,9 +78,32 @@ namespace OxyPlot.Eto
             return new OxyMouseEventArgs
             {
                 Position = e.Location.ToScreenPoint(c),
-                ModifierKeys = modifiers
+                ModifierKeys = modifiers,
             };
         }
+
+        /// <summary>
+        /// Converts a <see cref="MouseButtons" /> to a <see cref="OxyMouseButton" />.
+        /// </summary>
+        /// <param name="button">The button to convert.</param>
+        /// <returns>The converted mouse button.</returns>
+        public static OxyMouseButton Convert(this MouseButtons button)
+        {
+            switch (button)
+            {
+                case MouseButtons.Primary:
+                    return OxyMouseButton.Left;
+                case MouseButtons.Middle:
+                    return OxyMouseButton.Middle;
+                case MouseButtons.Alternate:
+                    return OxyMouseButton.Right;
+
+                    // No mapping to OxyMouseButton.XButton1 && OxyMouseButton.XButton2
+            }
+
+            return OxyMouseButton.None;
+        }
+
         /// <summary>
         /// Converts the specified key.
         /// </summary>
@@ -213,28 +211,9 @@ namespace OxyPlot.Eto
                     return OxyKey.Multiply;
                 case Keys.N:
                     return OxyKey.N;
-                /*
-			case Keys.NumPad0:
-				return OxyKey.NumPad0;
-			case Keys.NumPad1:
-				return OxyKey.NumPad1;
-			case Keys.NumPad2:
-				return OxyKey.NumPad2;
-			case Keys.NumPad3:
-				return OxyKey.NumPad3;
-			case Keys.NumPad4:
-				return OxyKey.NumPad4;
-			case Keys.NumPad5:
-				return OxyKey.NumPad5;
-			case Keys.NumPad6:
-				return OxyKey.NumPad6;
-			case Keys.NumPad7:
-				return OxyKey.NumPad7;
-			case Keys.NumPad8:
-				return OxyKey.NumPad8;
-			case Keys.NumPad9:
-				return OxyKey.NumPad9;
-				*/
+
+                /* No mapping : OxyKey.NumPad0 .. OxyKey.NumPad9 */
+
                 case Keys.O:
                     return OxyKey.O;
                 case Keys.P:
@@ -278,9 +257,9 @@ namespace OxyPlot.Eto
             }
         }
 
-        public static ScreenPoint ToScreenPoint(this PointF ControlPoint, Control c)
+        public static ScreenPoint ToScreenPoint(this PointF controlPoint, Control c)
         {
-            var scrpoint = ControlPoint;// c.PointToScreen(ControlPoint);
+            var scrpoint = controlPoint; // c.PointToScreen(ControlPoint);
             return new ScreenPoint(scrpoint.X, scrpoint.Y);
         }
     }

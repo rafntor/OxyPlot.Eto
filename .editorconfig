@@ -26,3 +26,6 @@ tab_size = 2
 indent_style=space
 tab_width=4
 indent_size=4
+
+# SA1636: File header copyright text should match
+dotnet_diagnostic.SA1636.severity = suggestion

@@ -10,8 +10,8 @@
 namespace OxyPlot.Eto
 {
     using System;
-    using System.Diagnostics;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Runtime.InteropServices;
     using global::Eto.Drawing;
     using global::Eto.Forms;
@@ -46,12 +46,6 @@ namespace OxyPlot.Eto
         /// The render context.
         /// </summary>
         private readonly GraphicsRenderContext renderContext;
-
-        /// <summary>
-        /// The tracker label.
-        /// </summary>
-        [NonSerialized]
-        private Label trackerLabel; /* This is actually not used */
 
         /// <summary>
         /// The current model (holding a reference to this plot view).
@@ -96,12 +90,12 @@ namespace OxyPlot.Eto
             this.ZoomRectangleCursor = Cursors.Pointer; // WindowsForms use Cursors.SizeNWSE;
             this.ZoomHorizontalCursor = Cursors.HorizontalSplit;
             this.ZoomVerticalCursor = Cursors.VerticalSplit;
-            var DoCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
-            this.ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, DoCopy);
+            var doCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
+            this.ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, doCopy);
 
-            this.SizeChanged += OnResize;
-            this.MouseEnter += OnMouseEnter;
-            this.KeyDown += OnPreviewKeyDown;
+            this.SizeChanged += this.OnResize;
+            this.MouseEnter += this.OnMouseEnter;
+            this.KeyDown += this.OnPreviewKeyDown;
         }
 
         /// <summary>
@@ -151,7 +145,7 @@ namespace OxyPlot.Eto
         {
             get
             {
-                //return new OxyRect(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.ClientRectangle.Height);
+                // return new OxyRect(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.ClientRectangle.Height);
                 return new OxyRect(0, 0, this.ClientSize.Width, this.ClientSize.Height);
             }
         }
@@ -229,10 +223,7 @@ namespace OxyPlot.Eto
         /// </summary>
         public void HideTracker()
         {
-            if (this.trackerLabel != null)
-            {
-                this.trackerLabel.Visible = false;
-            }
+            // Method intentionally left empty. Must implement interface
         }
 
         /// <summary>
@@ -248,7 +239,7 @@ namespace OxyPlot.Eto
         /// Invalidates the plot (not blocking the UI thread)
         /// </summary>
         /// <param name="updateData">if set to <c>true</c>, all data collections will be updated.</param>
-        public void InvalidatePlot(bool updateData)
+        public void InvalidatePlot(bool updateData = true)
         {
             lock (this.invalidateLock)
             {
@@ -311,10 +302,10 @@ namespace OxyPlot.Eto
         /// <summary>
         /// Shows the tracker.
         /// </summary>
-        /// <param name="data">The data.</param>
-        public void ShowTracker(TrackerHitResult data)
+        /// <param name="trackerHitResult">The data.</param>
+        public void ShowTracker(TrackerHitResult trackerHitResult)
         {
-            ToolTip = data.ToString();
+            this.ToolTip = trackerHitResult.ToString();
         }
 
         /// <summary>
@@ -376,8 +367,10 @@ namespace OxyPlot.Eto
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-            /* TODO Is this relevant? */
-            //this.Capture = false;
+            /*
+             * TODO Is this relevant?
+            this.Capture = false;
+             */
             this.ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
         }
 
@@ -455,7 +448,8 @@ namespace OxyPlot.Eto
                         using (var zoomPen = new Pen(Color.FromArgb(0, 0, 0)))
                         {
                             zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
-                            //zoomPen.DashPattern = new float[] { 3, 1 };
+
+                            // zoomPen.DashPattern = new float[] { 3, 1 };
                             e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
                             e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
                         }
@@ -468,15 +462,13 @@ namespace OxyPlot.Eto
                 Debug.WriteLine(paintException);
                 Debug.WriteLine(trace);
                 var font = Fonts.Monospace(10);
-                {
-                    //e.Graphics.RestoreTransform();
-                    e.Graphics.DrawText(font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, "OxyPlot paint exception: " + paintException.Message);
-                    //    e.Graphics.DrawString(
-                    //      "OxyPlot paint exception: " + paintException.Message, font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-                }
+
+                // e.Graphics.RestoreTransform();
+                e.Graphics.DrawText(font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, "OxyPlot paint exception: " + paintException.Message);
+
+                // e.Graphics.DrawString("OxyPlot paint exception: " + paintException.Message, font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
             }
         }
-
 
         /// <summary>
         /// Raises the <see cref="E:System.Windows.Forms.Control.PreviewKeyDown" /> event.

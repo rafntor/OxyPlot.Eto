@@ -11,12 +11,8 @@ namespace OxyPlot.Eto
 {
     using System;
     using System.Collections.Generic;
-    using global::Eto.Drawing;
-    /*using System.Drawing.Drawing2D;
-    using System.Drawing.Imaging;
-    using System.Drawing.Text;*/
-    using System.IO;
     using System.Linq;
+    using global::Eto.Drawing;
 
     using OxyPlot;
 
@@ -238,7 +234,6 @@ namespace OxyPlot.Eto
 
                 using (var graphicsState = this.g.SaveTransformState())
                 {
-
                     this.g.TranslateTransform((float)p.X, (float)p.Y);
 
                     var layoutRectangle = new RectangleF(0, 0, size.Width, size.Height);
@@ -304,20 +299,20 @@ namespace OxyPlot.Eto
         /// <param name="srcY">The source asynchronous.</param>
         /// <param name="srcWidth">Width of the source.</param>
         /// <param name="srcHeight">Height of the source.</param>
-        /// <param name="x">The executable.</param>
-        /// <param name="y">The asynchronous.</param>
-        /// <param name="w">The forward.</param>
-        /// <param name="h">The authentication.</param>
+        /// <param name="destX">The executable.</param>
+        /// <param name="destY">The asynchronous.</param>
+        /// <param name="destWidth">The forward.</param>
+        /// <param name="destHeight">The authentication.</param>
         /// <param name="opacity">The opacity.</param>
         /// <param name="interpolate">if set to <c>true</c> [interpolate].</param>
-        public override void DrawImage(OxyImage source, double srcX, double srcY, double srcWidth, double srcHeight, double x, double y, double w, double h, double opacity, bool interpolate)
+        public override void DrawImage(OxyImage source, double srcX, double srcY, double srcWidth, double srcHeight, double destX, double destY, double destWidth, double destHeight, double opacity, bool interpolate)
         {
             var image = this.GetImage(source);
             if (image != null)
             {
                 /* TODO FIXME opacity not implemented */
 
-                //ImageAttributes ia = null;
+                // ImageAttributes ia = null;
                 if (opacity < 1)
                 {
                     throw new NotImplementedException("Opacity not implemented");
@@ -337,27 +332,16 @@ namespace OxyPlot.Eto
                 }
 
                 this.g.ImageInterpolation = interpolate ? ImageInterpolation.High : ImageInterpolation.None;
-                int sx = (int)Math.Floor(x);
-                int sy = (int)Math.Floor(y);
-                int sw = (int)Math.Ceiling(x + w) - sx;
-                int sh = (int)Math.Ceiling(y + h) - sy;
+                int sx = (int)Math.Floor(destX);
+                int sy = (int)Math.Floor(destY);
+                int sw = (int)Math.Ceiling(destX + destWidth) - sx;
+                int sh = (int)Math.Ceiling(destY + destHeight) - sy;
                 var destRect = new Rectangle(sx, sy, sw, sh);
                 RectangleF sourceRect = new RectangleF((float)srcX - 0.5f, (float)srcY - 0.5f, (float)srcWidth, (float)srcHeight);
                 this.g.DrawImage(image, sourceRect, destRect);
-                //this.g.DrawImage(image, destRect, (float)srcX - 0.5f, (float)srcY - 0.5f, (float)srcWidth, (float)srcHeight, GraphicsUnit.Pixel, ia);
+
+                // this.g.DrawImage(image, destRect, (float)srcX - 0.5f, (float)srcY - 0.5f, (float)srcWidth, (float)srcHeight, GraphicsUnit.Pixel, ia);
             }
-        }
-
-        /// <inheritdoc/>
-        protected override void SetClip(OxyRect rect)
-        {
-            this.g.SetClip(rect.ToRect());
-        }
-
-        /// <inheritdoc/>
-        protected override void ResetClip()
-        {
-            this.g.ResetClip();
         }
 
         /// <summary>
@@ -370,21 +354,35 @@ namespace OxyPlot.Eto
             {
                 i.Value.Dispose();
             }
+
             this.imageCache.Clear();
 
             // dispose pens, brushes etc.
-
             foreach (var brush in this.brushes.Values)
             {
                 brush.Dispose();
             }
+
             this.brushes.Clear();
 
             foreach (var pen in this.pens.Values)
             {
                 pen.Dispose();
             }
+
             this.pens.Clear();
+        }
+
+        /// <inheritdoc/>
+        protected override void SetClip(OxyRect clippingRectangle)
+        {
+            this.g.SetClip(clippingRectangle.ToRect());
+        }
+
+        /// <inheritdoc/>
+        protected override void ResetClip()
+        {
+            this.g.ResetClip();
         }
 
         /// <summary>
@@ -396,7 +394,10 @@ namespace OxyPlot.Eto
         /// <returns>A font</returns>
         private static Font CreateFont(string fontFamily, double fontSize, FontStyle fontStyle)
         {
-            if (fontFamily == null) { Font f = Fonts.Sans((float)(fontSize * FontsizeFactor)); return new Font(f.Family, (float)(fontSize * FontsizeFactor)); }
+            if (string.IsNullOrEmpty(fontFamily))
+            {
+                fontFamily = FontFamilies.Sans.Name;
+            }
 
             return new Font(fontFamily, (float)fontSize * FontsizeFactor, fontStyle);
         }
@@ -475,7 +476,7 @@ namespace OxyPlot.Eto
                 return pen;
             }
 
-            return this.pens[description] = CreatePen(stroke, thickness, dashArray, lineJoin);
+            return this.pens[description] = this.CreatePen(stroke, thickness, dashArray, lineJoin);
         }
 
         /// <summary>
@@ -503,6 +504,7 @@ namespace OxyPlot.Eto
                 case OxyPlot.LineJoin.Bevel:
                     pen.LineJoin = PenLineJoin.Bevel;
                     break;
+
                     // The default LineJoin is Miter
             }
 

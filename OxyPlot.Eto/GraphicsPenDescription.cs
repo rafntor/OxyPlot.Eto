@@ -1,3 +1,11 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="GraphicsPenDescription.cs" company="OxyPlot">
+//   Copyright (c) 2014 OxyPlot contributors
+// </copyright>
+// <summary>
+//   The GraphicsPenDescription class.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace OxyPlot.Eto
 {
@@ -13,6 +21,11 @@ namespace OxyPlot.Eto
     public class GraphicsPenDescription
     {
         /// <summary>
+        /// The HashCode of the <see cref="GraphicsPenDescription" /> instance, as computed in the constructor.
+        /// </summary>
+        private readonly int cachedHashCode;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="GraphicsPenDescription" /> class.
         /// </summary>
         /// <param name="color">The color.</param>
@@ -21,12 +34,12 @@ namespace OxyPlot.Eto
         /// <param name="lineJoin">The line join.</param>
         public GraphicsPenDescription(OxyColor color, double thickness, double[] dashArray = null, OxyPlot.LineJoin lineJoin = OxyPlot.LineJoin.Miter)
         {
-            Color = color;
-            Thickness = thickness;
-            DashArray = dashArray;
-            LineJoin = lineJoin;
+            this.Color = color;
+            this.Thickness = thickness;
+            this.DashArray = dashArray;
+            this.LineJoin = lineJoin;
 
-            cachedHashCode = ComputeHashCode();
+            this.cachedHashCode = this.ComputeHashCode();
         }
 
         /// <summary>
@@ -54,11 +67,6 @@ namespace OxyPlot.Eto
         public LineJoin LineJoin { get; }
 
         /// <summary>
-        /// The HashCode of the <see cref="GraphicsPenDescription" /> instance, as computed in the constructor.
-        /// </summary>
-        private readonly int cachedHashCode;
-
-        /// <summary>
         /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
         /// </summary>
         /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
@@ -68,10 +76,10 @@ namespace OxyPlot.Eto
             var description = obj as GraphicsPenDescription;
 
             return description != null &&
-                   Color.Equals(description.Color) &&
-                   Thickness == description.Thickness &&
-                   DashArraysEquals(DashArray, description.DashArray) &&
-                   LineJoin == description.LineJoin;
+                   this.Color.Equals(description.Color) &&
+                   this.Thickness == description.Thickness &&
+                   DashArraysEquals(this.DashArray, description.DashArray) &&
+                   this.LineJoin == description.LineJoin;
         }
 
         /// <summary>
@@ -80,7 +88,7 @@ namespace OxyPlot.Eto
         /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
         public override int GetHashCode()
         {
-            return cachedHashCode;
+            return this.cachedHashCode;
         }
 
         /// <summary>
@@ -93,10 +101,10 @@ namespace OxyPlot.Eto
 
             unchecked
             {
-                hashCode = hashCode * -1521134295 + Color.GetHashCode();
-                hashCode = hashCode * -1521134295 + Thickness.GetHashCode();
-                hashCode = hashCode * -1521134295 + ComputeDashArrayHashCode(DashArray);
-                hashCode = hashCode * -1521134295 + LineJoin.GetHashCode();
+                hashCode = (hashCode * -1521134295) + this.Color.GetHashCode();
+                hashCode = (hashCode * -1521134295) + this.Thickness.GetHashCode();
+                hashCode = (hashCode * -1521134295) + ComputeDashArrayHashCode(this.DashArray);
+                hashCode = (hashCode * -1521134295) + this.LineJoin.GetHashCode();
             }
 
             return hashCode;
@@ -120,7 +128,7 @@ namespace OxyPlot.Eto
             {
                 unchecked
                 {
-                    hashCode = hashCode * 31 + array[i].GetHashCode();
+                    hashCode = (hashCode * 31) + array[i].GetHashCode();
                 }
             }
 

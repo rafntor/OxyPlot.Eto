@@ -20,12 +20,12 @@ namespace OxyPlot.Eto
         /// <summary>
         /// The graphics drawing surface.
         /// </summary>
-        private Graphics g;
+        private readonly Graphics g;
 
         /// <summary>
         /// The render context.
         /// </summary>
-        private GraphicsRenderContext grc;
+        private readonly GraphicsRenderContext grc;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SvgExporter" /> class.
