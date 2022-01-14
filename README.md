@@ -6,7 +6,9 @@
 [![License](https://img.shields.io/github/license/rafntor/OxyPlot.Eto)](LICENSE)
 
 This is a port of the WindowsForms backend of [OxyPlot](https://github.com/oxyplot/oxyplot) to [Eto.Forms](https://github.com/picoe/Eto). It does not require any native controls and therefore should run on all platforms supported by Eto.  
-This project is forked from https://github.com/mostanes/OxyPlot.EtoForms.
+This project is forked from https://github.com/mostanes/OxyPlot.EtoForms.  
+
+Demo applications : https://nightly.link/rafntor/OxyPlot.Eto/workflows/build/master
 
 ## Quickstart
 
