@@ -25,6 +25,9 @@ jobs:
       run: |
         dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained TestApp
         dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained TestApp
+        # wrap artifacts in tar archives to maintain permissions intact
+        tar --directory=TestApp/bin/Mac64/Debug/net6.0/osx-x64/publish -cvf TestApp.Mac.tar TestApp.app
+        tar --directory=TestApp/bin/Gtk/Debug/net6.0/linux-x64/publish -cvf TestApp.Gtk.tar TestApp
 
     - name: SonarScanner # for .NET 6 with pull request decoration support
       uses: highbyte/sonarscan-dotnet@v2.1.2
@@ -40,13 +43,13 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: TestApp.Mac
-        path: TestApp/bin/Mac64/Debug/net6.0/osx-x64/publish/TestApp.app/**/*
+        path: TestApp.Mac.tar
 
     - name: Upload TestApp.Gtk artifacts
       uses: actions/upload-artifact@v2
       with:
         name: TestApp.Gtk
-        path: TestApp/bin/Gtk/Debug/net6.0/linux-x64/publish/TestApp
+        path: TestApp.Gtk.tar
 
   build-windows:
 

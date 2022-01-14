@@ -35,7 +35,7 @@ namespace TestApp
 		{
 			var rand = new Random();
 
-			var model = new PlotModel { Title = "Cake Type Popularity" };
+			var model = new PlotModel { Title = "Cake Type Popularity", DefaultFont = Eto.Drawing.FontFamilies.Sans.Name };
 
 			var cakePopularity = Enumerable.Range(1, 5).Select(i => rand.NextDouble()).ToArray();
 			var sum = cakePopularity.Sum();
