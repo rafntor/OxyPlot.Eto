@@ -7,12 +7,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.Eto
+namespace OxyPlot.Eto.Skia
 {
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Runtime.InteropServices;
+    using global::Eto.SkiaDraw;
     using global::Eto.Drawing;
     using global::Eto.Forms;
 
@@ -20,7 +21,7 @@ namespace OxyPlot.Eto
     /// Represents a control that displays a <see cref="PlotModel" />.
     /// </summary>
     [Serializable]
-    public class PlotView : Drawable, IPlotView
+    public class PlotView : SkiaDrawable, IPlotView
     {
         /// <summary>
         /// The invalidate lock.
@@ -82,10 +83,10 @@ namespace OxyPlot.Eto
             this.CanFocus = true;
 
             this.PanCursor = Cursors.Move;
-            this.ZoomRectangleCursor = Cursors.Pointer; // WindowsForms use Cursors.SizeNWSE;
+            this.ZoomRectangleCursor = Cursors.Pointer;
             this.ZoomHorizontalCursor = Cursors.HorizontalSplit;
             this.ZoomVerticalCursor = Cursors.VerticalSplit;
-            var doCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
+            var doCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy());
             this.ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, doCopy);
 
             this.SizeChanged += this.OnResize;
@@ -529,16 +530,13 @@ namespace OxyPlot.Eto
         /// <summary>
         /// Performs the copy operation.
         /// </summary>
-        private void DoCopy(IPlotView view, OxyInputEventArgs args)
+        private void DoCopy()
         {
-            var exporter = new PngExporter
-            {
-                Width = this.ClientSize.Width,
-                Height = this.ClientSize.Height,
-            };
+            var stream = new System.IO.MemoryStream();
 
-            var bitmap = exporter.ExportToBitmap(this.ActualModel);
-            Clipboard.Instance.Image = bitmap;
+            SkiaSharp.PngExporter.Export(this.ActualModel, stream, this.ClientSize.Width, this.ClientSize.Height);
+
+            Clipboard.Instance.Image = new global::Eto.Drawing.Bitmap(stream);
         }
     }
 }

@@ -2,6 +2,7 @@ using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using OxyPlot.Eto;
+using OxyPlot.Eto.Skia;
 using Eto.Forms;
 using System.Linq;
 using System;
@@ -19,13 +20,26 @@ namespace TestApp
 
             var myModel = new PlotModel { Title = "Example 1", DefaultFont = Eto.Drawing.FontFamilies.Sans.Name };
             myModel.Series.Add(new FunctionSeries(Math.Cos, 0, 10, 0.1, "cos(x)"));
-            var plotView = new PlotView() { Model = myModel };
+            Panel plotView = new OxyPlot.Eto.PlotView() { Model = myModel };
 
             this.Content = plotView;
 
             this.MouseUp += (s, e) => 
-            { 
-                plotView.Model = BuildPlotModel();
+            {
+                var model = BuildPlotModel();
+
+                if (plotView is OxyPlot.Eto.PlotView)
+                {
+                    model.Title += " (SkiaDraw)";
+
+                    plotView = new OxyPlot.Eto.Skia.PlotView() { Model = model };
+                }
+                else
+                {
+                    model.Title += " (Eto.Drawing)";
+
+                    plotView = new OxyPlot.Eto.PlotView() { Model = model };
+                }
 
                 Content = plotView;
             };
