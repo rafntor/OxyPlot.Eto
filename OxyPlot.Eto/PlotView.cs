@@ -87,10 +87,6 @@ namespace OxyPlot.Eto
             this.ZoomVerticalCursor = Cursors.VerticalSplit;
             var doCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
             this.ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, doCopy);
-
-            this.SizeChanged += this.OnResize;
-            this.MouseEnter += this.OnMouseEnter;
-            this.KeyDown += this.OnPreviewKeyDown;
         }
 
         /// <summary>
@@ -361,11 +357,7 @@ namespace OxyPlot.Eto
             this.ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
         }
 
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.MouseEnter" /> event.
-        /// </summary>
-        /// <param name="e">An <see cref="T:System.EventArgs" /> that contains the event data.</param>
-        protected void OnMouseEnter(object sender, MouseEventArgs e)
+        protected override void OnMouseEnter(MouseEventArgs e)
         {
             this.ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
@@ -457,21 +449,13 @@ namespace OxyPlot.Eto
             }
         }
 
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.PreviewKeyDown" /> event.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.PreviewKeyDownEventArgs" /> that contains the event data.</param>
-        protected void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        protected override void OnKeyDown(KeyEventArgs e)
         {
             var args = new OxyKeyEventArgs { ModifierKeys = GetModifiers(), Key = e.Key.Convert() };
             this.ActualController.HandleKeyDown(this, args);
         }
 
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.Resize" /> event.
-        /// </summary>
-        /// <param name="e">An <see cref="T:System.EventArgs" /> that contains the event data.</param>
-        protected void OnResize(object sender, EventArgs e)
+        protected override void OnSizeChanged(EventArgs e)
         {
             this.InvalidatePlot(false);
         }
