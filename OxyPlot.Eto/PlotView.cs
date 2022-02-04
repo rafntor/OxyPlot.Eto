@@ -61,7 +61,7 @@ namespace OxyPlot.Eto
         /// <summary>
         /// The default controller.
         /// </summary>
-        private IPlotController defaultController;
+        private IPlotController defaultController = new PlotController();
 
         /// <summary>
         /// The update data flag.
@@ -86,7 +86,7 @@ namespace OxyPlot.Eto
             this.ZoomHorizontalCursor = Cursors.HorizontalSplit;
             this.ZoomVerticalCursor = Cursors.VerticalSplit;
             var doCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
-            this.ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, doCopy);
+            (this as IView).ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, doCopy);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace OxyPlot.Eto
         /// Gets the actual model.
         /// </summary>
         /// <value>The actual model.</value>
-        public PlotModel ActualModel
+        PlotModel IPlotView.ActualModel
         {
             get
             {
@@ -125,31 +125,18 @@ namespace OxyPlot.Eto
         {
             get
             {
-                return this.ActualController;
+                return this.Controller ?? this.defaultController;
             }
         }
 
         /// <summary>
         /// Gets the coordinates of the client area of the view.
         /// </summary>
-        public OxyRect ClientArea
+        OxyRect IView.ClientArea
         {
             get
             {
-                // return new OxyRect(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.ClientRectangle.Height);
                 return new OxyRect(0, 0, this.ClientSize.Width, this.ClientSize.Height);
-            }
-        }
-
-        /// <summary>
-        /// Gets the actual plot controller.
-        /// </summary>
-        /// <value>The actual plot controller.</value>
-        public IPlotController ActualController
-        {
-            get
-            {
-                return this.Controller ?? (this.defaultController ?? (this.defaultController = new PlotController()));
             }
         }
 
@@ -204,7 +191,7 @@ namespace OxyPlot.Eto
         /// <summary>
         /// Hides the tracker.
         /// </summary>
-        public void HideTracker()
+        void IPlotView.HideTracker()
         {
             this.ToolTip = null;
         }
@@ -212,7 +199,7 @@ namespace OxyPlot.Eto
         /// <summary>
         /// Hides the zoom rectangle.
         /// </summary>
-        public void HideZoomRectangle()
+        void IView.HideZoomRectangle()
         {
             this.zoomRectangle = Rectangle.Empty;
             this.Invalidate();
@@ -236,7 +223,7 @@ namespace OxyPlot.Eto
         /// <summary>
         /// Called when the Model property has been changed.
         /// </summary>
-        public void OnModelChanged()
+        private void OnModelChanged()
         {
             lock (this.modelLock)
             {
@@ -260,7 +247,7 @@ namespace OxyPlot.Eto
         /// Sets the cursor type.
         /// </summary>
         /// <param name="cursorType">The cursor type.</param>
-        public void SetCursorType(OxyPlot.CursorType cursorType)
+        void IView.SetCursorType(OxyPlot.CursorType cursorType)
         {
             switch (cursorType)
             {
@@ -286,7 +273,7 @@ namespace OxyPlot.Eto
         /// Shows the tracker.
         /// </summary>
         /// <param name="trackerHitResult">The data.</param>
-        public void ShowTracker(TrackerHitResult trackerHitResult)
+        void IPlotView.ShowTracker(TrackerHitResult trackerHitResult)
         {
             this.ToolTip = trackerHitResult.ToString();
         }
@@ -295,7 +282,7 @@ namespace OxyPlot.Eto
         /// Shows the zoom rectangle.
         /// </summary>
         /// <param name="rectangle">The rectangle.</param>
-        public void ShowZoomRectangle(OxyRect rectangle)
+        void IView.ShowZoomRectangle(OxyRect rectangle)
         {
             this.zoomRectangle = new Rectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Width, (int)rectangle.Height);
             this.Invalidate();
@@ -305,19 +292,9 @@ namespace OxyPlot.Eto
         /// Sets the clipboard text.
         /// </summary>
         /// <param name="text">The text.</param>
-        public void SetClipboardText(string text)
+        void IPlotView.SetClipboardText(string text)
         {
-            try
-            {
-                // todo: can't get the following solution to work
-                // http://stackoverflow.com/questions/5707990/requested-clipboard-operation-did-not-succeed
-                Clipboard.Instance.Text = text;
-            }
-            catch (ExternalException ee)
-            {
-                // Requested Clipboard operation did not succeed.
-                MessageBox.Show(this, ee.Message, "OxyPlot");
-            }
+            Clipboard.Instance.Text = text;
         }
 
         /// <summary>
@@ -328,8 +305,7 @@ namespace OxyPlot.Eto
         {
             base.OnMouseDown(e);
 
-            this.Focus();
-            this.ActualController.HandleMouseDown(this, e.ToMouseDownEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseDown(this, e.ToMouseDownEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -340,7 +316,7 @@ namespace OxyPlot.Eto
         {
             base.OnMouseMove(e);
 
-            this.ActualController.HandleMouseMove(this, e.ToMouseEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseMove(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -350,16 +326,15 @@ namespace OxyPlot.Eto
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-            /*
-             * TODO Is this relevant?
-            this.Capture = false;
-             */
-            this.ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
+
+            (this as IView).ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
         }
 
         protected override void OnMouseEnter(MouseEventArgs e)
         {
-            this.ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(GetModifiers(), this));
+            base.OnMouseEnter(e);
+
+            (this as IView).ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -368,7 +343,9 @@ namespace OxyPlot.Eto
         /// <param name="e">An <see cref="T:System.EventArgs" /> that contains the event data.</param>
         protected override void OnMouseLeave(MouseEventArgs e)
         {
-            this.ActualController.HandleMouseLeave(this, e.ToMouseEventArgs(GetModifiers(), this));
+            base.OnMouseLeave(e);
+
+            (this as IView).ActualController.HandleMouseLeave(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -378,7 +355,8 @@ namespace OxyPlot.Eto
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             base.OnMouseWheel(e);
-            this.ActualController.HandleMouseWheel(this, e.ToMouseWheelEventArgs(GetModifiers(), this));
+
+            (this as IView).ActualController.HandleMouseWheel(this, e.ToMouseWheelEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -451,12 +429,16 @@ namespace OxyPlot.Eto
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            base.OnKeyDown(e);
+
             var args = new OxyKeyEventArgs { ModifierKeys = GetModifiers(), Key = e.Key.Convert() };
-            this.ActualController.HandleKeyDown(this, args);
+            (this as IView).ActualController.HandleKeyDown(this, args);
         }
 
         protected override void OnSizeChanged(EventArgs e)
         {
+            base.OnSizeChanged(e);
+
             this.InvalidatePlot(false);
         }
 
@@ -521,7 +503,8 @@ namespace OxyPlot.Eto
                 Height = this.ClientSize.Height,
             };
 
-            var bitmap = exporter.ExportToBitmap(this.ActualModel);
+            var bitmap = exporter.ExportToBitmap(this.Model);
+
             Clipboard.Instance.Image = bitmap;
         }
     }
