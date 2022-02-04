@@ -13,6 +13,7 @@ namespace OxyPlot.Eto.Skia
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Runtime.InteropServices;
+    using OxyPlot.SkiaSharp;
     using global::Eto.SkiaDraw;
     using global::Eto.Drawing;
     using global::Eto.Forms;
@@ -41,7 +42,7 @@ namespace OxyPlot.Eto.Skia
         /// <summary>
         /// The render context.
         /// </summary>
-        private readonly GraphicsRenderContext renderContext;
+        private readonly SkiaRenderContext renderContext = new SkiaRenderContext();
 
         /// <summary>
         /// The current model (holding a reference to this plot view).
@@ -62,7 +63,7 @@ namespace OxyPlot.Eto.Skia
         /// <summary>
         /// The default controller.
         /// </summary>
-        private IPlotController defaultController;
+        private IPlotController defaultController = new PlotController();
 
         /// <summary>
         /// The update data flag.
@@ -79,7 +80,6 @@ namespace OxyPlot.Eto.Skia
         /// </summary>
         public PlotView()
         {
-            this.renderContext = new GraphicsRenderContext();
             this.CanFocus = true;
 
             this.PanCursor = Cursors.Move;
@@ -87,7 +87,7 @@ namespace OxyPlot.Eto.Skia
             this.ZoomHorizontalCursor = Cursors.HorizontalSplit;
             this.ZoomVerticalCursor = Cursors.VerticalSplit;
             var doCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy());
-            this.ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, doCopy);
+            (this as IView).ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, doCopy);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace OxyPlot.Eto.Skia
         /// Gets the actual model.
         /// </summary>
         /// <value>The actual model.</value>
-        public PlotModel ActualModel
+        PlotModel IPlotView.ActualModel
         {
             get
             {
@@ -126,31 +126,18 @@ namespace OxyPlot.Eto.Skia
         {
             get
             {
-                return this.ActualController;
+                return this.Controller ?? this.defaultController;
             }
         }
 
         /// <summary>
         /// Gets the coordinates of the client area of the view.
         /// </summary>
-        public OxyRect ClientArea
+        OxyRect IView.ClientArea
         {
             get
             {
-                // return new OxyRect(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.ClientRectangle.Height);
                 return new OxyRect(0, 0, this.ClientSize.Width, this.ClientSize.Height);
-            }
-        }
-
-        /// <summary>
-        /// Gets the actual plot controller.
-        /// </summary>
-        /// <value>The actual plot controller.</value>
-        public IPlotController ActualController
-        {
-            get
-            {
-                return this.Controller ?? (this.defaultController ?? (this.defaultController = new PlotController()));
             }
         }
 
@@ -205,15 +192,15 @@ namespace OxyPlot.Eto.Skia
         /// <summary>
         /// Hides the tracker.
         /// </summary>
-        public void HideTracker()
+        void IPlotView.HideTracker()
         {
-            // Method intentionally left empty. Must implement interface
+            this.ToolTip = null;
         }
 
         /// <summary>
         /// Hides the zoom rectangle.
         /// </summary>
-        public void HideZoomRectangle()
+        void IView.HideZoomRectangle()
         {
             this.zoomRectangle = Rectangle.Empty;
             this.Invalidate();
@@ -237,7 +224,7 @@ namespace OxyPlot.Eto.Skia
         /// <summary>
         /// Called when the Model property has been changed.
         /// </summary>
-        public void OnModelChanged()
+        private void OnModelChanged()
         {
             lock (this.modelLock)
             {
@@ -261,7 +248,7 @@ namespace OxyPlot.Eto.Skia
         /// Sets the cursor type.
         /// </summary>
         /// <param name="cursorType">The cursor type.</param>
-        public void SetCursorType(OxyPlot.CursorType cursorType)
+        void IView.SetCursorType(OxyPlot.CursorType cursorType)
         {
             switch (cursorType)
             {
@@ -287,7 +274,7 @@ namespace OxyPlot.Eto.Skia
         /// Shows the tracker.
         /// </summary>
         /// <param name="trackerHitResult">The data.</param>
-        public void ShowTracker(TrackerHitResult trackerHitResult)
+        void IPlotView.ShowTracker(TrackerHitResult trackerHitResult)
         {
             this.ToolTip = trackerHitResult.ToString();
         }
@@ -296,7 +283,7 @@ namespace OxyPlot.Eto.Skia
         /// Shows the zoom rectangle.
         /// </summary>
         /// <param name="rectangle">The rectangle.</param>
-        public void ShowZoomRectangle(OxyRect rectangle)
+        void IView.ShowZoomRectangle(OxyRect rectangle)
         {
             this.zoomRectangle = new Rectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Width, (int)rectangle.Height);
             this.Invalidate();
@@ -306,19 +293,9 @@ namespace OxyPlot.Eto.Skia
         /// Sets the clipboard text.
         /// </summary>
         /// <param name="text">The text.</param>
-        public void SetClipboardText(string text)
+        void IPlotView.SetClipboardText(string text)
         {
-            try
-            {
-                // todo: can't get the following solution to work
-                // http://stackoverflow.com/questions/5707990/requested-clipboard-operation-did-not-succeed
-                Clipboard.Instance.Text = text;
-            }
-            catch (ExternalException ee)
-            {
-                // Requested Clipboard operation did not succeed.
-                MessageBox.Show(this, ee.Message, "OxyPlot");
-            }
+            Clipboard.Instance.Text = text;
         }
 
         /// <summary>
@@ -329,8 +306,7 @@ namespace OxyPlot.Eto.Skia
         {
             base.OnMouseDown(e);
 
-            this.Focus();
-            this.ActualController.HandleMouseDown(this, e.ToMouseDownEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseDown(this, e.ToMouseDownEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -341,7 +317,7 @@ namespace OxyPlot.Eto.Skia
         {
             base.OnMouseMove(e);
 
-            this.ActualController.HandleMouseMove(this, e.ToMouseEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseMove(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -351,16 +327,15 @@ namespace OxyPlot.Eto.Skia
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-            /*
-             * TODO Is this relevant?
-            this.Capture = false;
-             */
-            this.ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
+
+            (this as IView).ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
         }
 
         protected override void OnMouseEnter(MouseEventArgs e)
         {
-            this.ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(GetModifiers(), this));
+            base.OnMouseEnter(e);
+
+            (this as IView).ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -369,7 +344,9 @@ namespace OxyPlot.Eto.Skia
         /// <param name="e">An <see cref="T:System.EventArgs" /> that contains the event data.</param>
         protected override void OnMouseLeave(MouseEventArgs e)
         {
-            this.ActualController.HandleMouseLeave(this, e.ToMouseEventArgs(GetModifiers(), this));
+            base.OnMouseLeave(e);
+
+            (this as IView).ActualController.HandleMouseLeave(this, e.ToMouseEventArgs(GetModifiers(), this));
         }
 
         /// <summary>
@@ -379,85 +356,51 @@ namespace OxyPlot.Eto.Skia
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             base.OnMouseWheel(e);
-            this.ActualController.HandleMouseWheel(this, e.ToMouseWheelEventArgs(GetModifiers(), this));
+
+            (this as IView).ActualController.HandleMouseWheel(this, e.ToMouseWheelEventArgs(GetModifiers(), this));
         }
 
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.Paint" /> event.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs" /> that contains the event data.</param>
-        protected override void OnPaint(PaintEventArgs e)
+        protected override void OnPaint(SKPaintEventArgs e)
         {
             base.OnPaint(e);
-            try
+
+            var plot_model = this.Model;
+
+            if (plot_model is null)
+                return;
+
+            this.renderContext.SkCanvas = e.Surface.Canvas;
+
+            lock (this.invalidateLock)
             {
-                lock (this.invalidateLock)
+                if (this.isModelInvalidated)
                 {
-                    if (this.isModelInvalidated)
-                    {
-                        if (this.model != null)
-                        {
-                            ((IPlotModel)this.model).Update(this.updateDataFlag);
-                            this.updateDataFlag = false;
-                        }
+                    (plot_model as IPlotModel).Update(this.updateDataFlag);
+                    this.updateDataFlag = false;
 
-                        this.isModelInvalidated = false;
-                    }
-                }
-
-                lock (this.renderingLock)
-                {
-                    this.renderContext.SetGraphicsTarget(e.Graphics);
-
-                    if (this.model != null)
-                    {
-                        if (!this.model.Background.IsUndefined())
-                        {
-                            using (var brush = new SolidBrush(this.model.Background.ToEto()))
-                            {
-                                e.Graphics.FillRectangle(brush, e.ClipRectangle);
-                            }
-                        }
-
-                        ((IPlotModel)this.model).Render(this.renderContext, new OxyRect(0, 0, this.Width, this.Height));
-                    }
-
-                    if (this.zoomRectangle != Rectangle.Empty)
-                    {
-                        using (var zoomBrush = new SolidBrush(Color.FromArgb(0x40, 0xFF, 0xFF, 0x00)))
-                        using (var zoomPen = new Pen(Color.FromArgb(0, 0, 0)))
-                        {
-                            zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
-
-                            // zoomPen.DashPattern = new float[] { 3, 1 };
-                            e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
-                            e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
-                        }
-                    }
+                    this.isModelInvalidated = false;
                 }
             }
-            catch (Exception paintException)
+
+            lock (plot_model.SyncRoot)
             {
-                var trace = new StackTrace(paintException);
-                Debug.WriteLine(paintException);
-                Debug.WriteLine(trace);
-                var font = Fonts.Monospace(10);
-
-                // e.Graphics.RestoreTransform();
-                e.Graphics.DrawText(font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, "OxyPlot paint exception: " + paintException.Message);
-
-                // e.Graphics.DrawString("OxyPlot paint exception: " + paintException.Message, font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+                (plot_model as IPlotModel).Render(this.renderContext, new OxyRect(0, 0, Width, Height));
             }
+
+            this.renderContext.SkCanvas = null;
         }
-
+ 
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            base.OnKeyDown(e);
+
             var args = new OxyKeyEventArgs { ModifierKeys = GetModifiers(), Key = e.Key.Convert() };
-            this.ActualController.HandleKeyDown(this, args);
+            (this as IView).ActualController.HandleKeyDown(this, args);
         }
 
         protected override void OnSizeChanged(EventArgs e)
         {
+            base.OnSizeChanged(e);
             this.InvalidatePlot(false);
         }
 
@@ -518,9 +461,9 @@ namespace OxyPlot.Eto.Skia
         {
             var stream = new System.IO.MemoryStream();
 
-            SkiaSharp.PngExporter.Export(this.ActualModel, stream, this.ClientSize.Width, this.ClientSize.Height);
+            SkiaSharp.PngExporter.Export(this.Model, stream, this.ClientSize.Width, this.ClientSize.Height);
 
-            Clipboard.Instance.Image = new global::Eto.Drawing.Bitmap(stream);
+            Clipboard.Instance.Image = new Bitmap(stream);
         }
     }
 }
