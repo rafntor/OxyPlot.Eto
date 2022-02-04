@@ -73,7 +73,7 @@ namespace OxyPlot.Eto.Skia
         /// <summary>
         /// The zoom rectangle.
         /// </summary>
-        private Rectangle zoomRectangle;
+        private global::SkiaSharp.SKRect zoomRectangle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlotView" /> class.
@@ -202,7 +202,7 @@ namespace OxyPlot.Eto.Skia
         /// </summary>
         void IView.HideZoomRectangle()
         {
-            this.zoomRectangle = Rectangle.Empty;
+            this.zoomRectangle = global::SkiaSharp.SKRect.Empty;
             this.Invalidate();
         }
 
@@ -285,7 +285,11 @@ namespace OxyPlot.Eto.Skia
         /// <param name="rectangle">The rectangle.</param>
         void IView.ShowZoomRectangle(OxyRect rectangle)
         {
-            this.zoomRectangle = new Rectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Width, (int)rectangle.Height);
+            this.zoomRectangle = new global::SkiaSharp.SKRect(
+                (float)rectangle.Left,
+                (float)rectangle.Top,
+                (float)(rectangle.Left + rectangle.Width),
+                (float)(rectangle.Top + rectangle.Height));
             this.Invalidate();
         }
 
@@ -384,7 +388,28 @@ namespace OxyPlot.Eto.Skia
 
             lock (plot_model.SyncRoot)
             {
+                e.Surface.Canvas.Clear();
+
                 (plot_model as IPlotModel).Render(this.renderContext, new OxyRect(0, 0, Width, Height));
+            }
+
+            if (this.zoomRectangle != global::SkiaSharp.SKRect.Empty)
+            {
+                var fillPaint = new global::SkiaSharp.SKPaint()
+                {
+                    Style = global::SkiaSharp.SKPaintStyle.Fill,
+//                    BlendMode = global::SkiaSharp.SKBlendMode.DstOver,
+                    Color = new global::SkiaSharp.SKColor(0xFF, 0xFF, 0x00, 0x40),
+                };
+                var linePaint = new global::SkiaSharp.SKPaint()
+                {
+                    Style = global::SkiaSharp.SKPaintStyle.Stroke,
+                    PathEffect = global::SkiaSharp.SKPathEffect.CreateDash(new float[] { 5, 2 }, 0),
+                    Color = global::SkiaSharp.SKColors.Black,
+                };
+
+                e.Surface.Canvas.DrawRect(zoomRectangle, fillPaint);
+                e.Surface.Canvas.DrawRect(zoomRectangle, linePaint);
             }
 
             this.renderContext.SkCanvas = null;

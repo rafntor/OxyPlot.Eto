@@ -401,12 +401,11 @@ namespace OxyPlot.Eto
 
                     if (this.zoomRectangle != Rectangle.Empty)
                     {
-                        using (var zoomBrush = new SolidBrush(Color.FromArgb(0x40, 0xFF, 0xFF, 0x00)))
-                        using (var zoomPen = new Pen(Color.FromArgb(0, 0, 0)))
+                        using (var zoomBrush = new SolidBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0x40)))
+                        using (var zoomPen = new Pen(Colors.Black))
                         {
                             zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
 
-                            // zoomPen.DashPattern = new float[] { 3, 1 };
                             e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
                             e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
                         }
