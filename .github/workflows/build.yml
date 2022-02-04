@@ -66,6 +66,7 @@ jobs:
     - name: Build
       run: |
         dotnet build -c Release OxyPlot.Eto
+        dotnet build -c Release OxyPlot.Eto.Skia
         dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained OxyPlot.Eto.Demo
     
     - name: Upload OxyPlot.Eto.Demo.Wpf artifacts
