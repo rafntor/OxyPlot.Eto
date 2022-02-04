@@ -206,7 +206,7 @@ namespace OxyPlot.Eto
         /// </summary>
         public void HideTracker()
         {
-            // Method intentionally left empty. Must implement interface
+            this.ToolTip = null;
         }
 
         /// <summary>

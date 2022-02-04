@@ -18,7 +18,7 @@ namespace OxyPlot.Eto
     /// <summary>
     /// Describes a GDI+ Pen.
     /// </summary>
-    public class GraphicsPenDescription
+    internal class GraphicsPenDescription
     {
         /// <summary>
         /// The HashCode of the <see cref="GraphicsPenDescription" /> instance, as computed in the constructor.
