@@ -38,7 +38,7 @@ namespace OxyPlot.Eto
             {
                 Position = e.Location.ToScreenPoint(c),
                 ModifierKeys = GetModifiers(),
-                Delta = (int)(e.Delta.Height + e.Delta.Width),
+                Delta = (int) e.Delta.Height * 120, // https://github.com/picoe/Eto/blob/28d947e15974390a48928758209e07d0b8281cf0/src/Eto.Wpf/WpfConversions.cs#L21
             };
         }
 
