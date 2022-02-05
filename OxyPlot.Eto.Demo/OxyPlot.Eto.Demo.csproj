@@ -25,4 +25,8 @@
     <ProjectReference Include="..\OxyPlot.Eto\OxyPlot.Eto.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\oxyplot\Source\Examples\ExampleLibrary\**\*.cs" LinkBase="ExampleLibrary" />
+  </ItemGroup>
+
 </Project>
