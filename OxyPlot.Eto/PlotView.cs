@@ -23,19 +23,9 @@ namespace OxyPlot.Eto
     public class PlotView : Drawable, IPlotView
     {
         /// <summary>
-        /// The invalidate lock.
-        /// </summary>
-        private readonly object invalidateLock = new object();
-
-        /// <summary>
         /// The model lock.
         /// </summary>
         private readonly object modelLock = new object();
-
-        /// <summary>
-        /// The rendering lock.
-        /// </summary>
-        private readonly object renderingLock = new object();
 
         /// <summary>
         /// The render context.
@@ -211,11 +201,10 @@ namespace OxyPlot.Eto
         /// <param name="updateData">if set to <c>true</c>, all data collections will be updated.</param>
         public void InvalidatePlot(bool updateData = true)
         {
-            lock (this.invalidateLock)
-            {
-                this.isModelInvalidated = true;
-                this.updateDataFlag = this.updateDataFlag || updateData;
-            }
+            if (updateData)
+                this.updateDataFlag = true;
+
+            this.isModelInvalidated = true;
 
             this.Invalidate();
         }
@@ -366,49 +355,44 @@ namespace OxyPlot.Eto
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
+
             try
             {
-                lock (this.invalidateLock)
+                if (this.isModelInvalidated)
                 {
-                    if (this.isModelInvalidated)
-                    {
-                        if (this.model != null)
-                        {
-                            ((IPlotModel)this.model).Update(this.updateDataFlag);
-                            this.updateDataFlag = false;
-                        }
-
-                        this.isModelInvalidated = false;
-                    }
-                }
-
-                lock (this.renderingLock)
-                {
-                    this.renderContext.SetGraphicsTarget(e.Graphics);
-
                     if (this.model != null)
                     {
-                        if (!this.model.Background.IsUndefined())
-                        {
-                            using (var brush = new SolidBrush(this.model.Background.ToEto()))
-                            {
-                                e.Graphics.FillRectangle(brush, e.ClipRectangle);
-                            }
-                        }
-
-                        ((IPlotModel)this.model).Render(this.renderContext, new OxyRect(0, 0, this.Width, this.Height));
+                        ((IPlotModel)this.model).Update(this.updateDataFlag);
+                        this.updateDataFlag = false;
                     }
 
-                    if (this.zoomRectangle != Rectangle.Empty)
-                    {
-                        using (var zoomBrush = new SolidBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0x40)))
-                        using (var zoomPen = new Pen(Colors.Black))
-                        {
-                            zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
+                    this.isModelInvalidated = false;
+                }
 
-                            e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
-                            e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
+                this.renderContext.SetGraphicsTarget(e.Graphics);
+
+                if (this.model != null)
+                {
+                    if (!this.model.Background.IsUndefined())
+                    {
+                        using (var brush = new SolidBrush(this.model.Background.ToEto()))
+                        {
+                            e.Graphics.FillRectangle(brush, e.ClipRectangle);
                         }
+                    }
+
+                    ((IPlotModel)this.model).Render(this.renderContext, new OxyRect(0, 0, this.Width, this.Height));
+                }
+
+                if (this.zoomRectangle != Rectangle.Empty)
+                {
+                    using (var zoomBrush = new SolidBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0x40)))
+                    using (var zoomPen = new Pen(Colors.Black))
+                    {
+                        zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
+
+                        e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
+                        e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
                     }
                 }
             }

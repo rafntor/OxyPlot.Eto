@@ -25,19 +25,9 @@ namespace OxyPlot.Eto.Skia
     public class PlotView : SkiaDrawable, IPlotView
     {
         /// <summary>
-        /// The invalidate lock.
-        /// </summary>
-        private readonly object invalidateLock = new object();
-
-        /// <summary>
         /// The model lock.
         /// </summary>
         private readonly object modelLock = new object();
-
-        /// <summary>
-        /// The rendering lock.
-        /// </summary>
-        private readonly object renderingLock = new object();
 
         /// <summary>
         /// The render context.
@@ -212,11 +202,10 @@ namespace OxyPlot.Eto.Skia
         /// <param name="updateData">if set to <c>true</c>, all data collections will be updated.</param>
         public void InvalidatePlot(bool updateData = true)
         {
-            lock (this.invalidateLock)
-            {
-                this.isModelInvalidated = true;
-                this.updateDataFlag = this.updateDataFlag || updateData;
-            }
+            if (updateData)
+                this.updateDataFlag = true;
+
+            this.isModelInvalidated = true;
 
             this.Invalidate();
         }
@@ -375,15 +364,11 @@ namespace OxyPlot.Eto.Skia
 
             this.renderContext.SkCanvas = e.Surface.Canvas;
 
-            lock (this.invalidateLock)
+            if (this.isModelInvalidated)
             {
-                if (this.isModelInvalidated)
-                {
-                    (plot_model as IPlotModel).Update(this.updateDataFlag);
-                    this.updateDataFlag = false;
+                (plot_model as IPlotModel).Update(this.updateDataFlag);
 
-                    this.isModelInvalidated = false;
-                }
+                this.isModelInvalidated = this.updateDataFlag = false;
             }
 
             lock (plot_model.SyncRoot)
@@ -398,7 +383,6 @@ namespace OxyPlot.Eto.Skia
                 var fillPaint = new global::SkiaSharp.SKPaint()
                 {
                     Style = global::SkiaSharp.SKPaintStyle.Fill,
-//                    BlendMode = global::SkiaSharp.SKBlendMode.DstOver,
                     Color = new global::SkiaSharp.SKColor(0xFF, 0xFF, 0x00, 0x40),
                 };
                 var linePaint = new global::SkiaSharp.SKPaint()
