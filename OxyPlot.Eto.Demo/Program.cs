@@ -1,10 +1,10 @@
-﻿using Eto.Drawing;
+using Eto.Drawing;
 using Eto.Forms;
 using System;
 
 namespace TestApp
 {
-    class Program
+    static class Program
     {
         [STAThread]
         static void Main(string[] args)

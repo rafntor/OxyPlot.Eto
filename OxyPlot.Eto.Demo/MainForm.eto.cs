@@ -19,7 +19,14 @@ namespace TestApp
             var clickMe = new Command { MenuText = "Click Me!", ToolBarText = "Click Me!" };
             clickMe.Executed += (sender, e) => MessageBox.Show(this, "I was clicked!");
 
+            var toggle = new CheckCommand { MenuText = "Use Skia" };
+            toggle.Executed += (sender, e) => { UseSkia = !UseSkia; toggle.Checked = UseSkia; };
+
+#if WINDOWS
+            var quitCommand = new Command { MenuText = "Exit", Shortcut = Application.Instance.AlternateModifier | Keys.F4 };
+#else
             var quitCommand = new Command { MenuText = "Quit", Shortcut = Application.Instance.CommonModifier | Keys.Q };
+#endif
             quitCommand.Executed += (sender, e) => Application.Instance.Quit();
 
             var aboutCommand = new Command { MenuText = "About..." };
@@ -34,6 +41,7 @@ namespace TestApp
 //                  new SubMenuItem { Text = "&File", Items = { clickMe } },
                     // new SubMenuItem { Text = "&Edit", Items = { /* commands/items */ } },
                     // new SubMenuItem { Text = "&View", Items = { /* commands/items */ } },
+                    new SubMenuItem { Text = "&View", Items = { toggle } },
                 },
                 ApplicationItems =
                 {
@@ -45,7 +53,7 @@ namespace TestApp
             };
 
             // create toolbar           
-            //          ToolBar = new ToolBar { Items = { clickMe } };
+//            ToolBar = new ToolBar { Items = { clickMe } };
         }
     }
 }
