@@ -3,34 +3,38 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Description>OxyPlot plotting library for Eto.Forms</Description>
+    <Description>OxyPlot plotting library for Eto.Forms based on SkiaSharp</Description>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://oxyplot.github.io/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rafntor/OxyPlot.Eto</RepositoryUrl>
-    <PackageTags>OxyPlot Eto.Forms plotting plot charting chart</PackageTags>
+    <PackageTags>OxyPlot Eto.Forms plotting plot charting chart skia SkiaSharp</PackageTags>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression></PackageLicenseExpression>
-    <Copyright>Copyright © 2014 OxyPlot contributors, 2021 mostanes, 2021 rafntor</Copyright>
+    <Copyright>Copyright © 2014 OxyPlot contributors, 2021 rafntor</Copyright>
     <Authors>OxyPlot contributors</Authors>
     <Company></Company>
     <Product />
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Eto.Forms" Version="2.5.11" />
+    <PackageReference Include="Eto.SkiaDraw" Version="0.1.0" />
     <PackageReference Include="GitVersion.MsBuild" Version="5.8.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OxyPlot.Core" Version="2.1.0" />
+    <PackageReference Include="OxyPlot.SkiaSharp" Version="2.1.0" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="8.33.0.40503">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\OxyPlot.Eto\EtoConverterExtensions.cs"/>
+  </ItemGroup>
+  
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>

@@ -19,7 +19,7 @@ namespace OxyPlot.Eto
     /// <summary>
     /// The graphics render context.
     /// </summary>
-    public class GraphicsRenderContext : ClippingRenderContext, IDisposable
+    internal class GraphicsRenderContext : ClippingRenderContext, IDisposable
     {
         /// <summary>
         /// The font size factor.

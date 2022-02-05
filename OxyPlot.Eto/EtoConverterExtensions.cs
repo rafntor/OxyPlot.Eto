@@ -15,7 +15,7 @@ namespace OxyPlot.Eto
     /// <summary>
     /// Extension method used to convert to/from Eto classes.
     /// </summary>
-    public static class EtoConverterExtensions
+    internal static class EtoConverterExtensions
     {
         /// <summary>
         /// Converts <see cref="MouseEventArgs" /> to <see cref="OxyMouseWheelEventArgs" /> for a mouse wheel event.

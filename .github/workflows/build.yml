@@ -23,11 +23,11 @@ jobs:
 
     - name: Build # SonarScan locks some files and breaks Build if done first
       run: |
-        dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained TestApp
-        dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained TestApp
+        dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained OxyPlot.Eto.Demo
+        dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained OxyPlot.Eto.Demo
         # wrap artifacts in tar archives to maintain permissions intact
-        tar --directory=TestApp/bin/Mac64/Debug/net6.0/osx-x64/publish -cvf TestApp.Mac.tar TestApp.app
-        tar --directory=TestApp/bin/Gtk/Debug/net6.0/linux-x64/publish -cvf TestApp.Gtk.tar TestApp
+        tar --directory=OxyPlot.Eto.Demo/bin/Mac64/Debug/net6.0/osx-x64/publish -cvf OxyPlot.Eto.Demo.Mac.tar OxyPlot.Eto.Demo.app
+        tar --directory=OxyPlot.Eto.Demo/bin/Gtk/Debug/net6.0/linux-x64/publish -cvf OxyPlot.Eto.Demo.Gtk.tar OxyPlot.Eto.Demo
 
     - name: SonarScanner # for .NET 6 with pull request decoration support
       uses: highbyte/sonarscan-dotnet@v2.1.2
@@ -39,17 +39,17 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-    - name: Upload TestApp.Mac artifacts
+    - name: Upload OxyPlot.Eto.Demo.Mac artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: TestApp.Mac
-        path: TestApp.Mac.tar
+        name: OxyPlot.Eto.Demo.Mac
+        path: OxyPlot.Eto.Demo.Mac.tar
 
-    - name: Upload TestApp.Gtk artifacts
+    - name: Upload OxyPlot.Eto.Demo.Gtk artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: TestApp.Gtk
-        path: TestApp.Gtk.tar
+        name: OxyPlot.Eto.Demo.Gtk
+        path: OxyPlot.Eto.Demo.Gtk.tar
 
   build-windows:
 
@@ -66,20 +66,23 @@ jobs:
     - name: Build
       run: |
         dotnet build -c Release OxyPlot.Eto
-        dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained TestApp
+        dotnet build -c Release OxyPlot.Eto.Skia
+        dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained OxyPlot.Eto.Demo
     
-    - name: Upload TestApp.Wpf artifacts
+    - name: Upload OxyPlot.Eto.Demo.Wpf artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: TestApp.Wpf
-        path: TestApp/bin/Wpf/Debug/net6.0-windows/win-x64/publish/TestApp.exe
+        name: OxyPlot.Eto.Demo.Wpf
+        path: OxyPlot.Eto.Demo/bin/Wpf/Debug/net6.0-windows/win-x64/publish/OxyPlot.Eto.Demo.exe
 
     - name: Upload nuget artifacts
       uses: actions/upload-artifact@v2
       with:
         name: nuget
-        path: OxyPlot.Eto/bin/Release/*.nupkg
+        path: ./**/bin/Release/*.nupkg
 
     - name: Push to nuget.org
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
-      run: dotnet nuget push '.\OxyPlot.Eto\bin\Release\*.nupkg' --skip-duplicate -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}}
+      run: |
+        dotnet nuget push '.\OxyPlot.Eto.Skia\bin\Release\*.nupkg' --skip-duplicate -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}}
+        dotnet nuget push '.\OxyPlot.Eto\bin\Release\*.nupkg' --skip-duplicate -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}}

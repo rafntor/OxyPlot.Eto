@@ -7,12 +7,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.Eto
+namespace OxyPlot.Eto.Skia
 {
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Runtime.InteropServices;
+    using OxyPlot.SkiaSharp;
+    using global::Eto.SkiaDraw;
     using global::Eto.Drawing;
     using global::Eto.Forms;
 
@@ -20,7 +22,7 @@ namespace OxyPlot.Eto
     /// Represents a control that displays a <see cref="PlotModel" />.
     /// </summary>
     [Serializable]
-    public class PlotView : Drawable, IPlotView
+    public class PlotView : SkiaDrawable, IPlotView
     {
         /// <summary>
         /// The invalidate lock.
@@ -40,7 +42,7 @@ namespace OxyPlot.Eto
         /// <summary>
         /// The render context.
         /// </summary>
-        private readonly GraphicsRenderContext renderContext;
+        private readonly SkiaRenderContext renderContext = new SkiaRenderContext();
 
         /// <summary>
         /// The current model (holding a reference to this plot view).
@@ -71,21 +73,20 @@ namespace OxyPlot.Eto
         /// <summary>
         /// The zoom rectangle.
         /// </summary>
-        private Rectangle zoomRectangle;
+        private global::SkiaSharp.SKRect zoomRectangle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlotView" /> class.
         /// </summary>
         public PlotView()
         {
-            this.renderContext = new GraphicsRenderContext();
             this.CanFocus = true;
 
             this.PanCursor = Cursors.Move;
-            this.ZoomRectangleCursor = Cursors.Pointer; // WindowsForms use Cursors.SizeNWSE;
+            this.ZoomRectangleCursor = Cursors.Pointer;
             this.ZoomHorizontalCursor = Cursors.HorizontalSplit;
             this.ZoomVerticalCursor = Cursors.VerticalSplit;
-            var doCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy(view, args));
+            var doCopy = new DelegatePlotCommand<OxyKeyEventArgs>((view, controller, args) => this.DoCopy());
             (this as IView).ActualController.BindKeyDown(OxyKey.C, OxyModifierKeys.Control, doCopy);
         }
 
@@ -201,7 +202,7 @@ namespace OxyPlot.Eto
         /// </summary>
         void IView.HideZoomRectangle()
         {
-            this.zoomRectangle = Rectangle.Empty;
+            this.zoomRectangle = global::SkiaSharp.SKRect.Empty;
             this.Invalidate();
         }
 
@@ -284,7 +285,11 @@ namespace OxyPlot.Eto
         /// <param name="rectangle">The rectangle.</param>
         void IView.ShowZoomRectangle(OxyRect rectangle)
         {
-            this.zoomRectangle = new Rectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Width, (int)rectangle.Height);
+            this.zoomRectangle = new global::SkiaSharp.SKRect(
+                (float)rectangle.Left,
+                (float)rectangle.Top,
+                (float)(rectangle.Left + rectangle.Width),
+                (float)(rectangle.Top + rectangle.Height));
             this.Invalidate();
         }
 
@@ -359,73 +364,57 @@ namespace OxyPlot.Eto
             (this as IView).ActualController.HandleMouseWheel(this, e.ToMouseWheelEventArgs(GetModifiers(), this));
         }
 
-        /// <summary>
-        /// Raises the <see cref="E:System.Windows.Forms.Control.Paint" /> event.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs" /> that contains the event data.</param>
-        protected override void OnPaint(PaintEventArgs e)
+        protected override void OnPaint(SKPaintEventArgs e)
         {
             base.OnPaint(e);
-            try
+
+            var plot_model = this.Model;
+
+            if (plot_model is null)
+                return;
+
+            this.renderContext.SkCanvas = e.Surface.Canvas;
+
+            lock (this.invalidateLock)
             {
-                lock (this.invalidateLock)
+                if (this.isModelInvalidated)
                 {
-                    if (this.isModelInvalidated)
-                    {
-                        if (this.model != null)
-                        {
-                            ((IPlotModel)this.model).Update(this.updateDataFlag);
-                            this.updateDataFlag = false;
-                        }
+                    (plot_model as IPlotModel).Update(this.updateDataFlag);
+                    this.updateDataFlag = false;
 
-                        this.isModelInvalidated = false;
-                    }
-                }
-
-                lock (this.renderingLock)
-                {
-                    this.renderContext.SetGraphicsTarget(e.Graphics);
-
-                    if (this.model != null)
-                    {
-                        if (!this.model.Background.IsUndefined())
-                        {
-                            using (var brush = new SolidBrush(this.model.Background.ToEto()))
-                            {
-                                e.Graphics.FillRectangle(brush, e.ClipRectangle);
-                            }
-                        }
-
-                        ((IPlotModel)this.model).Render(this.renderContext, new OxyRect(0, 0, this.Width, this.Height));
-                    }
-
-                    if (this.zoomRectangle != Rectangle.Empty)
-                    {
-                        using (var zoomBrush = new SolidBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0x40)))
-                        using (var zoomPen = new Pen(Colors.Black))
-                        {
-                            zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
-
-                            e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
-                            e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
-                        }
-                    }
+                    this.isModelInvalidated = false;
                 }
             }
-            catch (Exception paintException)
+
+            lock (plot_model.SyncRoot)
             {
-                var trace = new StackTrace(paintException);
-                Debug.WriteLine(paintException);
-                Debug.WriteLine(trace);
-                var font = Fonts.Monospace(10);
+                e.Surface.Canvas.Clear();
 
-                // e.Graphics.RestoreTransform();
-                e.Graphics.DrawText(font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, "OxyPlot paint exception: " + paintException.Message);
-
-                // e.Graphics.DrawString("OxyPlot paint exception: " + paintException.Message, font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+                (plot_model as IPlotModel).Render(this.renderContext, new OxyRect(0, 0, Width, Height));
             }
+
+            if (this.zoomRectangle != global::SkiaSharp.SKRect.Empty)
+            {
+                var fillPaint = new global::SkiaSharp.SKPaint()
+                {
+                    Style = global::SkiaSharp.SKPaintStyle.Fill,
+//                    BlendMode = global::SkiaSharp.SKBlendMode.DstOver,
+                    Color = new global::SkiaSharp.SKColor(0xFF, 0xFF, 0x00, 0x40),
+                };
+                var linePaint = new global::SkiaSharp.SKPaint()
+                {
+                    Style = global::SkiaSharp.SKPaintStyle.Stroke,
+                    PathEffect = global::SkiaSharp.SKPathEffect.CreateDash(new float[] { 5, 2 }, 0),
+                    Color = global::SkiaSharp.SKColors.Black,
+                };
+
+                e.Surface.Canvas.DrawRect(zoomRectangle, fillPaint);
+                e.Surface.Canvas.DrawRect(zoomRectangle, linePaint);
+            }
+
+            this.renderContext.SkCanvas = null;
         }
-
+ 
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
@@ -437,7 +426,6 @@ namespace OxyPlot.Eto
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
-
             this.InvalidatePlot(false);
         }
 
@@ -494,17 +482,13 @@ namespace OxyPlot.Eto
         /// <summary>
         /// Performs the copy operation.
         /// </summary>
-        private void DoCopy(IPlotView view, OxyInputEventArgs args)
+        private void DoCopy()
         {
-            var exporter = new PngExporter
-            {
-                Width = this.ClientSize.Width,
-                Height = this.ClientSize.Height,
-            };
+            var stream = new System.IO.MemoryStream();
 
-            var bitmap = exporter.ExportToBitmap(this.Model);
+            SkiaSharp.PngExporter.Export(this.Model, stream, this.ClientSize.Width, this.ClientSize.Height);
 
-            Clipboard.Instance.Image = bitmap;
+            Clipboard.Instance.Image = new Bitmap(stream);
         }
     }
 }
