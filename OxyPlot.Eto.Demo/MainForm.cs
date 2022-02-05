@@ -11,6 +11,7 @@ namespace TestApp
 {
     public partial class MainForm : Form
     {
+        CheckBox _skia = new CheckBox() { Text = "Use Skia" };
         CheckBox _reversed = new CheckBox() { Text = "Reversed" };
         CheckBox _transposed = new CheckBox() { Text = "Transposed" };
         Panel _plot_holder = new Panel();
@@ -19,17 +20,19 @@ namespace TestApp
         public MainForm()
         {
             InitializeComponent();
+            Menu = null;
 
             _tree = new TreeView() { DataStore = CreateTreeItem(),Width=300 };
             _tree.SelectionChanged += Tree_SelectionChanged;
             _reversed.CheckedChanged += (o, e) => InitPlot();
             _transposed.CheckedChanged += (o, e) => InitPlot();
+            _skia.CheckedChanged += (o, e) => UseSkia = _skia.Checked ?? false;
 
             UseSkia = false;
 
             var rightside = new DynamicLayout(
                 new DynamicRow(new DynamicControl() { Control = _plot_holder, YScale = true }),
-                new DynamicLayout(new DynamicRow(null, _transposed, _reversed))
+                new DynamicLayout(new DynamicRow(null, _transposed, _reversed, _skia))
                 );
 
             Content = new DynamicLayout(new DynamicRow(_tree, rightside));
