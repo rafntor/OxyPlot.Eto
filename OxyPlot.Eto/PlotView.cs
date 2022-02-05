@@ -305,7 +305,7 @@ namespace OxyPlot.Eto
         {
             base.OnMouseDown(e);
 
-            (this as IView).ActualController.HandleMouseDown(this, e.ToMouseDownEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseDown(this, e.ToMouseDownEventArgs(this));
         }
 
         /// <summary>
@@ -316,7 +316,7 @@ namespace OxyPlot.Eto
         {
             base.OnMouseMove(e);
 
-            (this as IView).ActualController.HandleMouseMove(this, e.ToMouseEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseMove(this, e.ToMouseEventArgs(this));
         }
 
         /// <summary>
@@ -327,14 +327,14 @@ namespace OxyPlot.Eto
         {
             base.OnMouseUp(e);
 
-            (this as IView).ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseUp(this, e.ToMouseUpEventArgs(this));
         }
 
         protected override void OnMouseEnter(MouseEventArgs e)
         {
             base.OnMouseEnter(e);
 
-            (this as IView).ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseEnter(this, e.ToMouseEventArgs(this));
         }
 
         /// <summary>
@@ -345,7 +345,7 @@ namespace OxyPlot.Eto
         {
             base.OnMouseLeave(e);
 
-            (this as IView).ActualController.HandleMouseLeave(this, e.ToMouseEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseLeave(this, e.ToMouseEventArgs(this));
         }
 
         /// <summary>
@@ -356,7 +356,7 @@ namespace OxyPlot.Eto
         {
             base.OnMouseWheel(e);
 
-            (this as IView).ActualController.HandleMouseWheel(this, e.ToMouseWheelEventArgs(GetModifiers(), this));
+            (this as IView).ActualController.HandleMouseWheel(this, e.ToMouseWheelEventArgs(this));
         }
 
         /// <summary>
@@ -430,8 +430,7 @@ namespace OxyPlot.Eto
         {
             base.OnKeyDown(e);
 
-            var args = new OxyKeyEventArgs { ModifierKeys = GetModifiers(), Key = e.Key.Convert() };
-            (this as IView).ActualController.HandleKeyDown(this, args);
+            (this as IView).ActualController.HandleKeyDown(this, e.ToOxyKeyEventArgs());
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -460,35 +459,6 @@ namespace OxyPlot.Eto
             {
                 this.renderContext.Dispose();
             }
-        }
-
-        /// <summary>
-        /// Gets the current modifier keys.
-        /// </summary>
-        /// <returns>A <see cref="OxyModifierKeys" /> value.</returns>
-        private static OxyModifierKeys GetModifiers()
-        {
-            var modifiers = OxyModifierKeys.None;
-
-            // ReSharper disable once RedundantNameQualifier
-            if ((Keyboard.Modifiers & Keys.Shift) == Keys.Shift)
-            {
-                modifiers |= OxyModifierKeys.Shift;
-            }
-
-            // ReSharper disable once RedundantNameQualifier
-            if ((Keyboard.Modifiers & Keys.Control) == Keys.Control)
-            {
-                modifiers |= OxyModifierKeys.Control;
-            }
-
-            // ReSharper disable once RedundantNameQualifier
-            if ((Keyboard.Modifiers & Keys.Alt) == Keys.Alt)
-            {
-                modifiers |= OxyModifierKeys.Alt;
-            }
-
-            return modifiers;
         }
 
         /// <summary>

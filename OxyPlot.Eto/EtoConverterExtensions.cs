@@ -17,18 +17,27 @@ namespace OxyPlot.Eto
     /// </summary>
     internal static class EtoConverterExtensions
     {
+        public static OxyKeyEventArgs ToOxyKeyEventArgs(this KeyEventArgs e)
+        {
+            return new OxyKeyEventArgs
+            {
+                ModifierKeys = GetModifiers(),
+                Key = e.Key.Convert(),
+            };
+        }
+
         /// <summary>
         /// Converts <see cref="MouseEventArgs" /> to <see cref="OxyMouseWheelEventArgs" /> for a mouse wheel event.
         /// </summary>
         /// <param name="e">The <see cref="MouseEventArgs" /> instance containing the event data.</param>
         /// <param name="modifiers">The modifiers.</param>
         /// <returns>A <see cref="OxyMouseWheelEventArgs" /> containing the converted event arguments.</returns>
-        public static OxyMouseWheelEventArgs ToMouseWheelEventArgs(this MouseEventArgs e, OxyModifierKeys modifiers, Control c)
+        public static OxyMouseWheelEventArgs ToMouseWheelEventArgs(this MouseEventArgs e, Control c)
         {
             return new OxyMouseWheelEventArgs
             {
                 Position = e.Location.ToScreenPoint(c),
-                ModifierKeys = modifiers,
+                ModifierKeys = GetModifiers(),
                 Delta = (int)(e.Delta.Height + e.Delta.Width),
             };
         }
@@ -39,7 +48,7 @@ namespace OxyPlot.Eto
         /// <param name="e">The <see cref="MouseEventArgs" /> instance containing the event data.</param>
         /// <param name="modifiers">The modifiers.</param>
         /// <returns>A <see cref="OxyMouseDownEventArgs" /> containing the converted event arguments.</returns>
-        public static OxyMouseDownEventArgs ToMouseDownEventArgs(this MouseEventArgs e, OxyModifierKeys modifiers, Control c)
+        public static OxyMouseDownEventArgs ToMouseDownEventArgs(this MouseEventArgs e, Control c)
         {
             return new OxyMouseDownEventArgs
             {
@@ -48,7 +57,7 @@ namespace OxyPlot.Eto
                 ClickCount = 1,
                 /* ClickCount = e.Clicks */
                 Position = e.Location.ToScreenPoint(c),
-                ModifierKeys = modifiers
+                ModifierKeys = GetModifiers()
             };
         }
 
@@ -58,12 +67,12 @@ namespace OxyPlot.Eto
         /// <param name="e">The <see cref="MouseEventArgs" /> instance containing the event data.</param>
         /// <param name="modifiers">The modifiers.</param>
         /// <returns>A <see cref="OxyMouseEventArgs" /> containing the converted event arguments.</returns>
-        public static OxyMouseEventArgs ToMouseUpEventArgs(this MouseEventArgs e, OxyModifierKeys modifiers, Control c)
+        public static OxyMouseEventArgs ToMouseUpEventArgs(this MouseEventArgs e, Control c)
         {
             return new OxyMouseEventArgs
             {
                 Position = e.Location.ToScreenPoint(c),
-                ModifierKeys = modifiers,
+                ModifierKeys = GetModifiers(),
             };
         }
 
@@ -73,12 +82,12 @@ namespace OxyPlot.Eto
         /// <param name="e">The <see cref="MouseEventArgs" /> instance containing the event data.</param>
         /// <param name="modifiers">The modifiers.</param>
         /// <returns>A <see cref="OxyMouseEventArgs" /> containing the converted event arguments.</returns>
-        public static OxyMouseEventArgs ToMouseEventArgs(this MouseEventArgs e, OxyModifierKeys modifiers, Control c)
+        public static OxyMouseEventArgs ToMouseEventArgs(this MouseEventArgs e, Control c)
         {
             return new OxyMouseEventArgs
             {
                 Position = e.Location.ToScreenPoint(c),
-                ModifierKeys = modifiers,
+                ModifierKeys = GetModifiers(),
             };
         }
 
@@ -261,6 +270,35 @@ namespace OxyPlot.Eto
         {
             var scrpoint = controlPoint; // c.PointToScreen(ControlPoint);
             return new ScreenPoint(scrpoint.X, scrpoint.Y);
+        }
+
+        /// <summary>
+        /// Gets the current modifier keys.
+        /// </summary>
+        /// <returns>A <see cref="OxyModifierKeys" /> value.</returns>
+        private static OxyModifierKeys GetModifiers()
+        {
+            var modifiers = OxyModifierKeys.None;
+
+            // ReSharper disable once RedundantNameQualifier
+            if ((Keyboard.Modifiers & Keys.Shift) == Keys.Shift)
+            {
+                modifiers |= OxyModifierKeys.Shift;
+            }
+
+            // ReSharper disable once RedundantNameQualifier
+            if ((Keyboard.Modifiers & Keys.Control) == Keys.Control)
+            {
+                modifiers |= OxyModifierKeys.Control;
+            }
+
+            // ReSharper disable once RedundantNameQualifier
+            if ((Keyboard.Modifiers & Keys.Alt) == Keys.Alt)
+            {
+                modifiers |= OxyModifierKeys.Alt;
+            }
+
+            return modifiers;
         }
     }
 }
