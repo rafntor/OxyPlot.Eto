@@ -75,16 +75,8 @@ namespace TestApp
             get => _plot_holder.Content is OxyPlot.Eto.Skia.PlotView;
             set
             {
-                if (_plot_holder.Content is OxyPlot.Eto.PlotView etoview)
-                {
-                    etoview.Controller = null;
-                    etoview.Model = null;
-                }
-                if (_plot_holder.Content is OxyPlot.Eto.Skia.PlotView skiaview)
-                {
-                    skiaview.Controller = null;
-                    skiaview.Model = null;
-                }
+                (_plot_holder.Content as OxyPlot.Eto.PlotView)?.Dispose();
+                (_plot_holder.Content as OxyPlot.Eto.Skia.PlotView)?.Dispose();
 
                 _plot_holder.Content = value ? new OxyPlot.Eto.Skia.PlotView() : new OxyPlot.Eto.PlotView();
 

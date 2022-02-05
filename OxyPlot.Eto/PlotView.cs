@@ -447,6 +447,9 @@ namespace OxyPlot.Eto
         /// <param name="disposing">Whether to dispose managed resources or not.</param>
         protected override void Dispose(bool disposing)
         {
+            this.Model = null;
+            this.Controller = null;
+
             bool disposed = this.IsDisposed;
 
             base.Dispose(disposing);
