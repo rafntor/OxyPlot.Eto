@@ -23,19 +23,9 @@ namespace OxyPlot.Eto
     public class PlotView : Drawable, IPlotView
     {
         /// <summary>
-        /// The invalidate lock.
-        /// </summary>
-        private readonly object invalidateLock = new object();
-
-        /// <summary>
         /// The model lock.
         /// </summary>
         private readonly object modelLock = new object();
-
-        /// <summary>
-        /// The rendering lock.
-        /// </summary>
-        private readonly object renderingLock = new object();
 
         /// <summary>
         /// The render context.
@@ -72,6 +62,8 @@ namespace OxyPlot.Eto
         /// The zoom rectangle.
         /// </summary>
         private Rectangle zoomRectangle;
+
+        private TrackerHitResult trackerHitResult;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlotView" /> class.
@@ -189,11 +181,35 @@ namespace OxyPlot.Eto
         public Cursor ZoomVerticalCursor { get; set; }
 
         /// <summary>
+        /// Shows the tracker.
+        /// </summary>
+        /// <param name="trackerHitResult">The data.</param>
+        void IPlotView.ShowTracker(TrackerHitResult trackerHitResult)
+        {
+            this.trackerHitResult = trackerHitResult;
+
+            this.Invalidate();
+        }
+
+        /// <summary>
         /// Hides the tracker.
         /// </summary>
         void IPlotView.HideTracker()
         {
-            this.ToolTip = null;
+            this.trackerHitResult = null;
+
+            this.Invalidate();
+        }
+
+        /// <summary>
+        /// Shows the zoom rectangle.
+        /// </summary>
+        /// <param name="rectangle">The rectangle.</param>
+        void IView.ShowZoomRectangle(OxyRect rectangle)
+        {
+            this.zoomRectangle = new Rectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Width, (int)rectangle.Height);
+
+            this.Invalidate();
         }
 
         /// <summary>
@@ -202,6 +218,7 @@ namespace OxyPlot.Eto
         void IView.HideZoomRectangle()
         {
             this.zoomRectangle = Rectangle.Empty;
+
             this.Invalidate();
         }
 
@@ -211,11 +228,10 @@ namespace OxyPlot.Eto
         /// <param name="updateData">if set to <c>true</c>, all data collections will be updated.</param>
         public void InvalidatePlot(bool updateData = true)
         {
-            lock (this.invalidateLock)
-            {
-                this.isModelInvalidated = true;
-                this.updateDataFlag = this.updateDataFlag || updateData;
-            }
+            if (updateData)
+                this.updateDataFlag = true;
+
+            this.isModelInvalidated = true;
 
             this.Invalidate();
         }
@@ -267,25 +283,6 @@ namespace OxyPlot.Eto
                     this.Cursor = Cursors.Arrow;
                     break;
             }
-        }
-
-        /// <summary>
-        /// Shows the tracker.
-        /// </summary>
-        /// <param name="trackerHitResult">The data.</param>
-        void IPlotView.ShowTracker(TrackerHitResult trackerHitResult)
-        {
-            this.ToolTip = trackerHitResult.ToString();
-        }
-
-        /// <summary>
-        /// Shows the zoom rectangle.
-        /// </summary>
-        /// <param name="rectangle">The rectangle.</param>
-        void IView.ShowZoomRectangle(OxyRect rectangle)
-        {
-            this.zoomRectangle = new Rectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Width, (int)rectangle.Height);
-            this.Invalidate();
         }
 
         /// <summary>
@@ -366,50 +363,50 @@ namespace OxyPlot.Eto
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
+
             try
             {
-                lock (this.invalidateLock)
+                if (this.isModelInvalidated)
                 {
-                    if (this.isModelInvalidated)
+                    if (this.model != null)
                     {
-                        if (this.model != null)
-                        {
-                            ((IPlotModel)this.model).Update(this.updateDataFlag);
-                            this.updateDataFlag = false;
-                        }
+                        ((IPlotModel)this.model).Update(this.updateDataFlag);
+                        this.updateDataFlag = false;
+                    }
 
-                        this.isModelInvalidated = false;
+                    this.isModelInvalidated = false;
+                }
+
+                this.renderContext.SetGraphicsTarget(e.Graphics);
+
+                if (this.model != null)
+                {
+                    if (!this.model.Background.IsUndefined())
+                    {
+                        using (var brush = new SolidBrush(this.model.Background.ToEto()))
+                        {
+                            e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                        }
+                    }
+
+                    ((IPlotModel)this.model).Render(this.renderContext, new OxyRect(0, 0, this.Width, this.Height));
+                }
+
+                if (this.zoomRectangle != Rectangle.Empty)
+                {
+                    using (var zoomBrush = new SolidBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0x40)))
+                    using (var zoomPen = new Pen(Colors.Black))
+                    {
+                        zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
+
+                        e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
+                        e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
                     }
                 }
 
-                lock (this.renderingLock)
+                if (this.trackerHitResult != null)
                 {
-                    this.renderContext.SetGraphicsTarget(e.Graphics);
-
-                    if (this.model != null)
-                    {
-                        if (!this.model.Background.IsUndefined())
-                        {
-                            using (var brush = new SolidBrush(this.model.Background.ToEto()))
-                            {
-                                e.Graphics.FillRectangle(brush, e.ClipRectangle);
-                            }
-                        }
-
-                        ((IPlotModel)this.model).Render(this.renderContext, new OxyRect(0, 0, this.Width, this.Height));
-                    }
-
-                    if (this.zoomRectangle != Rectangle.Empty)
-                    {
-                        using (var zoomBrush = new SolidBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0x40)))
-                        using (var zoomPen = new Pen(Colors.Black))
-                        {
-                            zoomPen.DashStyle = new DashStyle(0f, 3f, 1f);
-
-                            e.Graphics.FillRectangle(zoomBrush, this.zoomRectangle);
-                            e.Graphics.DrawRectangle(zoomPen, this.zoomRectangle);
-                        }
-                    }
+                    DrawTracker(e.Graphics);
                 }
             }
             catch (Exception paintException)
@@ -423,6 +420,58 @@ namespace OxyPlot.Eto
                 e.Graphics.DrawText(font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, "OxyPlot paint exception: " + paintException.Message);
 
                 // e.Graphics.DrawString("OxyPlot paint exception: " + paintException.Message, font, Brushes.Red, this.Width * 0.5f, this.Height * 0.5f, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+            }
+        }
+
+        private void DrawTracker(Graphics graphics)
+        {
+            var color = Colors.Black;
+            color.Ab = 0x80;
+
+            graphics.DrawLine(color,
+                (float)trackerHitResult.XAxis.ScreenMin.X,
+                (float)trackerHitResult.Position.Y,
+                (float)trackerHitResult.XAxis.ScreenMax.X,
+                (float)trackerHitResult.Position.Y);
+            graphics.DrawLine(color,
+                (float)trackerHitResult.Position.X,
+                (float)trackerHitResult.YAxis.ScreenMin.Y,
+                (float)trackerHitResult.Position.X,
+                (float)trackerHitResult.YAxis.ScreenMax.Y);
+
+            var font = Fonts.Sans(9);
+            var char_size = font.MeasureString("X");
+            float width = 0, height = char_size.Height;
+
+            var lines = trackerHitResult.Text.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var line in lines)
+            {
+                var size = font.MeasureString(line);
+
+                width = Math.Max(width, size.Width + char_size.Width * 2);
+                height += size.Height;
+            }
+
+            var rect = new RectangleF(
+                (float)trackerHitResult.Position.X,
+                (float)trackerHitResult.Position.Y,
+                width, height);
+
+            var xoff = rect.Location.X > this.Width / 2 ? -rect.Width : 0;
+            var yoff = rect.Location.Y > this.Height / 2 ? -rect.Height : 0;
+            rect.Offset(xoff, yoff);
+
+            graphics.FillRectangle(Colors.LightSkyBlue, rect);
+            graphics.DrawRectangle(Colors.Black, rect);
+
+            var location = rect.Location;
+            location.X += char_size.Width;
+            location.Y -= char_size.Height / 2;
+            foreach (var line in lines)
+            {
+                location.Y += char_size.Height;
+                graphics.DrawText(font, Colors.Black, location, line);
             }
         }
 
