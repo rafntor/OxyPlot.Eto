@@ -67,6 +67,16 @@ namespace OxyPlot.Eto.Skia
 
         private TrackerHitResult trackerHitResult;
 
+        global::SkiaSharp.SKPaint fillPaint = new global::SkiaSharp.SKPaint()
+        {
+            Style = global::SkiaSharp.SKPaintStyle.Fill,
+        };
+        global::SkiaSharp.SKPaint linePaint = new global::SkiaSharp.SKPaint()
+        {
+            Style = global::SkiaSharp.SKPaintStyle.Stroke,
+        };
+        global::SkiaSharp.SKPathEffect dashEffect = global::SkiaSharp.SKPathEffect.CreateDash(new float[] { 5, 2 }, 0);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PlotView" /> class.
         /// </summary>
@@ -182,12 +192,37 @@ namespace OxyPlot.Eto.Skia
         public Cursor ZoomVerticalCursor { get; set; }
 
         /// <summary>
+        /// Shows the tracker.
+        /// </summary>
+        /// <param name="trackerHitResult">The data.</param>
+        void IPlotView.ShowTracker(TrackerHitResult trackerHitResult)
+        {
+            this.trackerHitResult = trackerHitResult;
+
+            this.Invalidate();
+        }
+
+        /// <summary>
         /// Hides the tracker.
         /// </summary>
         void IPlotView.HideTracker()
         {
             this.trackerHitResult = null;
 
+            this.Invalidate();
+        }
+
+        /// <summary>
+        /// Shows the zoom rectangle.
+        /// </summary>
+        /// <param name="rectangle">The rectangle.</param>
+        void IView.ShowZoomRectangle(OxyRect rectangle)
+        {
+            this.zoomRectangle = new global::SkiaSharp.SKRect(
+                (float)rectangle.Left,
+                (float)rectangle.Top,
+                (float)(rectangle.Left + rectangle.Width),
+                (float)(rectangle.Top + rectangle.Height));
             this.Invalidate();
         }
 
@@ -262,31 +297,6 @@ namespace OxyPlot.Eto.Skia
                     this.Cursor = Cursors.Arrow;
                     break;
             }
-        }
-
-        /// <summary>
-        /// Shows the tracker.
-        /// </summary>
-        /// <param name="trackerHitResult">The data.</param>
-        void IPlotView.ShowTracker(TrackerHitResult trackerHitResult)
-        {
-            this.trackerHitResult = trackerHitResult;
-
-            this.Invalidate();
-        }
-
-        /// <summary>
-        /// Shows the zoom rectangle.
-        /// </summary>
-        /// <param name="rectangle">The rectangle.</param>
-        void IView.ShowZoomRectangle(OxyRect rectangle)
-        {
-            this.zoomRectangle = new global::SkiaSharp.SKRect(
-                (float)rectangle.Left,
-                (float)rectangle.Top,
-                (float)(rectangle.Left + rectangle.Width),
-                (float)(rectangle.Top + rectangle.Height));
-            this.Invalidate();
         }
 
         /// <summary>
@@ -389,77 +399,70 @@ namespace OxyPlot.Eto.Skia
 
             if (this.zoomRectangle != global::SkiaSharp.SKRect.Empty)
             {
-                var fillPaint = new global::SkiaSharp.SKPaint()
-                {
-                    Style = global::SkiaSharp.SKPaintStyle.Fill,
-                    Color = new global::SkiaSharp.SKColor(0xFF, 0xFF, 0x00, 0x40),
-                };
-                var linePaint = new global::SkiaSharp.SKPaint()
-                {
-                    Style = global::SkiaSharp.SKPaintStyle.Stroke,
-                    PathEffect = global::SkiaSharp.SKPathEffect.CreateDash(new float[] { 5, 2 }, 0),
-                    Color = global::SkiaSharp.SKColors.Black,
-                };
+                fillPaint.Color = global::SkiaSharp.SKColors.Yellow.WithAlpha(0x40);
+                linePaint.Color = global::SkiaSharp.SKColors.Black;
+                linePaint.PathEffect = this.dashEffect;
 
                 e.Surface.Canvas.DrawRect(zoomRectangle, fillPaint);
                 e.Surface.Canvas.DrawRect(zoomRectangle, linePaint);
+
+                linePaint.PathEffect = null;
             }
 
             if (this.trackerHitResult != null)
             {
-                var fillPaint = new global::SkiaSharp.SKPaint()
-                {
-                    Style = global::SkiaSharp.SKPaintStyle.Fill,
-                    Color = global::SkiaSharp.SKColors.LightSkyBlue,
-                };
-                var linePaint = new global::SkiaSharp.SKPaint()
-                {
-                    Style = global::SkiaSharp.SKPaintStyle.Stroke,
-                    Color = global::SkiaSharp.SKColors.Black,
-                };
+                DrawTracker(e.Surface.Canvas);
+            }
+        }
 
-                var text = trackerHitResult.Text.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        private void DrawTracker(global::SkiaSharp.SKCanvas canvas)
+        {
+            linePaint.Color = global::SkiaSharp.SKColors.Black.WithAlpha(128);
 
-                float width = 0, height = fillPaint.FontSpacing * (text.Length + 0.5f);
-                var char_width = fillPaint.MeasureText("X");
+            canvas.DrawLine(
+                (float)trackerHitResult.XAxis.ScreenMin.X,
+                (float)trackerHitResult.Position.Y,
+                (float)trackerHitResult.XAxis.ScreenMax.X,
+                (float)trackerHitResult.Position.Y,
+                linePaint);
+            canvas.DrawLine(
+                (float)trackerHitResult.Position.X,
+                (float)trackerHitResult.YAxis.ScreenMin.Y,
+                (float)trackerHitResult.Position.X,
+                (float)trackerHitResult.YAxis.ScreenMax.Y,
+                linePaint);
 
-                foreach (var line in text)
-                    width = Math.Max(width, fillPaint.MeasureText(line) + char_width * 2);
+            var text = trackerHitResult.Text.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-                var rect = new global::SkiaSharp.SKRect(
-                    (float)trackerHitResult.Position.X,
-                    (float)trackerHitResult.Position.Y,
-                    (float)trackerHitResult.Position.X + width,
-                    (float)trackerHitResult.Position.Y + height);
+            float width = 0, height = fillPaint.FontSpacing * (text.Length + 0.5f);
+            var char_width = fillPaint.MeasureText("X");
 
-                var xoff = rect.Location.X > this.Width / 2 ? -rect.Width : 0;
-                var yoff = rect.Location.Y > this.Height / 2 ? -rect.Height : 0;
-                rect.Offset(xoff, yoff);
+            foreach (var line in text)
+                width = Math.Max(width, fillPaint.MeasureText(line) + char_width * 2);
 
-                linePaint.Color = global::SkiaSharp.SKColors.Black.WithAlpha(128);
-                e.Surface.Canvas.DrawLine(
-                    (float)trackerHitResult.XAxis.ScreenMin.X,
-                    (float)trackerHitResult.Position.Y,
-                    (float)trackerHitResult.XAxis.ScreenMax.X,
-                    (float)trackerHitResult.Position.Y,
-                    linePaint);
-                e.Surface.Canvas.DrawLine(
-                    (float)trackerHitResult.Position.X,
-                    (float)trackerHitResult.YAxis.ScreenMin.Y,
-                    (float)trackerHitResult.Position.X,
-                    (float)trackerHitResult.YAxis.ScreenMax.Y,
-                    linePaint);
-                linePaint.Color = global::SkiaSharp.SKColors.Black;
-                e.Surface.Canvas.DrawRect(rect, fillPaint);
-                e.Surface.Canvas.DrawRect(rect, linePaint);
-                fillPaint.Color = linePaint.Color;
-                var location = rect.Location;
-                location.X += char_width;
-                foreach (var line in text)
-                {
-                    location.Y += fillPaint.FontSpacing;
-                    e.Surface.Canvas.DrawText(line, location, fillPaint);
-                }
+            var rect = new global::SkiaSharp.SKRect(
+                (float)trackerHitResult.Position.X,
+                (float)trackerHitResult.Position.Y,
+                (float)trackerHitResult.Position.X + width,
+                (float)trackerHitResult.Position.Y + height);
+
+            var xoff = rect.Location.X > this.Width / 2 ? -rect.Width : 0;
+            var yoff = rect.Location.Y > this.Height / 2 ? -rect.Height : 0;
+            rect.Offset(xoff, yoff);
+
+            fillPaint.Color = global::SkiaSharp.SKColors.LightSkyBlue;
+            linePaint.Color = global::SkiaSharp.SKColors.Black;
+
+            canvas.DrawRect(rect, fillPaint);
+            canvas.DrawRect(rect, linePaint);
+
+            fillPaint.Color = global::SkiaSharp.SKColors.Black;
+            var location = rect.Location;
+            location.X += char_width;
+            foreach (var line in text)
+            {
+                location.Y += fillPaint.FontSpacing;
+                canvas.DrawText(line, location, fillPaint);
             }
         }
  
