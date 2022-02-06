@@ -65,6 +65,8 @@ namespace OxyPlot.Eto.Skia
         /// </summary>
         private global::SkiaSharp.SKRect zoomRectangle;
 
+        private TrackerHitResult trackerHitResult;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PlotView" /> class.
         /// </summary>
@@ -184,7 +186,9 @@ namespace OxyPlot.Eto.Skia
         /// </summary>
         void IPlotView.HideTracker()
         {
-            this.ToolTip = null;
+            this.trackerHitResult = null;
+
+            this.Invalidate();
         }
 
         /// <summary>
@@ -193,6 +197,7 @@ namespace OxyPlot.Eto.Skia
         void IView.HideZoomRectangle()
         {
             this.zoomRectangle = global::SkiaSharp.SKRect.Empty;
+
             this.Invalidate();
         }
 
@@ -265,7 +270,9 @@ namespace OxyPlot.Eto.Skia
         /// <param name="trackerHitResult">The data.</param>
         void IPlotView.ShowTracker(TrackerHitResult trackerHitResult)
         {
-            this.ToolTip = trackerHitResult.ToString();
+            this.trackerHitResult = trackerHitResult;
+
+            this.Invalidate();
         }
 
         /// <summary>
@@ -357,12 +364,12 @@ namespace OxyPlot.Eto.Skia
         {
             base.OnPaint(e);
 
+            e.Surface.Canvas.Clear();
+
             var plot_model = this.Model;
 
             if (plot_model is null)
                 return;
-
-            this.renderContext.SkCanvas = e.Surface.Canvas;
 
             if (this.isModelInvalidated)
             {
@@ -373,9 +380,11 @@ namespace OxyPlot.Eto.Skia
 
             lock (plot_model.SyncRoot)
             {
-                e.Surface.Canvas.Clear();
+                this.renderContext.SkCanvas = e.Surface.Canvas;
 
                 (plot_model as IPlotModel).Render(this.renderContext, new OxyRect(0, 0, Width, Height));
+
+                this.renderContext.SkCanvas = null;
             }
 
             if (this.zoomRectangle != global::SkiaSharp.SKRect.Empty)
@@ -396,7 +405,62 @@ namespace OxyPlot.Eto.Skia
                 e.Surface.Canvas.DrawRect(zoomRectangle, linePaint);
             }
 
-            this.renderContext.SkCanvas = null;
+            if (this.trackerHitResult != null)
+            {
+                var fillPaint = new global::SkiaSharp.SKPaint()
+                {
+                    Style = global::SkiaSharp.SKPaintStyle.Fill,
+                    Color = global::SkiaSharp.SKColors.LightSkyBlue,
+                };
+                var linePaint = new global::SkiaSharp.SKPaint()
+                {
+                    Style = global::SkiaSharp.SKPaintStyle.Stroke,
+                    Color = global::SkiaSharp.SKColors.Black,
+                };
+
+                var text = trackerHitResult.Text.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                float width = 0, height = fillPaint.FontSpacing * (text.Length + 0.5f);
+                var char_width = fillPaint.MeasureText("X");
+
+                foreach (var line in text)
+                    width = Math.Max(width, fillPaint.MeasureText(line) + char_width * 2);
+
+                var rect = new global::SkiaSharp.SKRect(
+                    (float)trackerHitResult.Position.X,
+                    (float)trackerHitResult.Position.Y,
+                    (float)trackerHitResult.Position.X + width,
+                    (float)trackerHitResult.Position.Y + height);
+
+                var xoff = rect.Location.X > this.Width / 2 ? -rect.Width : 0;
+                var yoff = rect.Location.Y > this.Height / 2 ? -rect.Height : 0;
+                rect.Offset(xoff, yoff);
+
+                linePaint.Color = global::SkiaSharp.SKColors.Black.WithAlpha(128);
+                e.Surface.Canvas.DrawLine(
+                    (float)trackerHitResult.XAxis.ScreenMin.X,
+                    (float)trackerHitResult.Position.Y,
+                    (float)trackerHitResult.XAxis.ScreenMax.X,
+                    (float)trackerHitResult.Position.Y,
+                    linePaint);
+                e.Surface.Canvas.DrawLine(
+                    (float)trackerHitResult.Position.X,
+                    (float)trackerHitResult.YAxis.ScreenMin.Y,
+                    (float)trackerHitResult.Position.X,
+                    (float)trackerHitResult.YAxis.ScreenMax.Y,
+                    linePaint);
+                linePaint.Color = global::SkiaSharp.SKColors.Black;
+                e.Surface.Canvas.DrawRect(rect, fillPaint);
+                e.Surface.Canvas.DrawRect(rect, linePaint);
+                fillPaint.Color = linePaint.Color;
+                var location = rect.Location;
+                location.X += char_width;
+                foreach (var line in text)
+                {
+                    location.Y += fillPaint.FontSpacing;
+                    e.Surface.Canvas.DrawText(line, location, fillPaint);
+                }
+            }
         }
  
         protected override void OnKeyDown(KeyEventArgs e)
