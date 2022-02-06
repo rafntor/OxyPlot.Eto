@@ -432,12 +432,12 @@ namespace OxyPlot.Eto.Skia
                 (float)trackerHitResult.YAxis.ScreenMax.Y,
                 linePaint);
 
-            var text = trackerHitResult.Text.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = trackerHitResult.Text.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            float width = 0, height = fillPaint.FontSpacing * (text.Length + 0.5f);
+            float width = 0, height = fillPaint.FontSpacing * (lines.Length + 0.5f);
             var char_width = fillPaint.MeasureText("X");
 
-            foreach (var line in text)
+            foreach (var line in lines)
                 width = Math.Max(width, fillPaint.MeasureText(line) + char_width * 2);
 
             var rect = new global::SkiaSharp.SKRect(
@@ -459,7 +459,7 @@ namespace OxyPlot.Eto.Skia
             fillPaint.Color = global::SkiaSharp.SKColors.Black;
             var location = rect.Location;
             location.X += char_width;
-            foreach (var line in text)
+            foreach (var line in lines)
             {
                 location.Y += fillPaint.FontSpacing;
                 canvas.DrawText(line, location, fillPaint);
