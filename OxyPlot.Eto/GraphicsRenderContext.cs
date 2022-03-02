@@ -24,7 +24,7 @@ namespace OxyPlot.Eto
         /// <summary>
         /// The font size factor.
         /// </summary>
-        private const float FontsizeFactor = 0.8f;
+        private const float FontsizeFactor = 0.75f;
 
         /// <summary>
         /// The images in use
@@ -399,7 +399,25 @@ namespace OxyPlot.Eto
                 fontFamily = FontFamilies.Sans.Name;
             }
 
-            return new Font(fontFamily, (float)fontSize * FontsizeFactor, fontStyle);
+            float size = (float)fontSize * FontsizeFactor;
+
+            try
+            {
+                return new Font(fontFamily, size, fontStyle);
+            }
+            catch (Exception ex)
+            {
+                if (new string[] { "Times New Roman", "DejaVu Serif", "Times" }.Contains(fontFamily))
+                    return new Font(FontFamilies.Serif.Name, size, fontStyle);
+
+                if (new string[] { "Segoe UI", "DejaVu Sans", "Helvetica" }.Contains(fontFamily))
+                    return new Font(FontFamilies.Sans.Name, size, fontStyle);
+
+                if (new string[] { "Consolas", "DejaVu Sans Mono", "Courier" }.Contains(fontFamily))
+                    return new Font(FontFamilies.Monospace.Name, size, fontStyle);
+
+                throw ex;
+            }
         }
 
         /// <summary>
