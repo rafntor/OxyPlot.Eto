@@ -17,16 +17,17 @@ namespace TestApp
         CheckBox _autorun = new CheckBox() { Text = "Autorun" };
         UITimer _timer = new UITimer() { Interval = 1 };
         Panel _plot_holder = new Panel();
-        TreeView _tree;
+        TreeGridView _tree;
 
         public MainForm()
         {
             InitializeComponent();
             Menu = null;
 
-            _tree = new TreeView() { DataStore = CreateTreeItem(), Width=300 };
+            _tree = new TreeGridView() { DataStore = CreateTreeItem(), Width=300 };
+            _tree.Columns.Add(new GridColumn { DataCell = new TextBoxCell(0) });
             _tree.SelectionChanged += Tree_SelectionChanged;
-            _tree.SelectedItem = GetNextItem(_tree.DataStore as TreeItem);
+            _tree.SelectedItem = GetNextItem(_tree.DataStore as TreeGridItem);
             _reversed.CheckedChanged += (o, e) => InitPlot();
             _transposed.CheckedChanged += (o, e) => InitPlot();
             _skia.CheckedChanged += (o, e) => UseSkia = _skia.Checked ?? false;
@@ -48,7 +49,7 @@ namespace TestApp
         {
             if (SelectedExample is null)
             {
-                _tree.SelectedItem = GetNextItem(_tree.SelectedItem as TreeItem);
+                _tree.SelectedItem = GetNextItem(_tree.SelectedItem as TreeGridItem);
             }
             else if (_transposed.Enabled && (_transposed.Checked ?? false) == (_skia.Checked ?? false))
             {
@@ -60,12 +61,12 @@ namespace TestApp
             }
             else if ((_skia.Checked = !_skia.Checked) == false)
             { 
-                _tree.SelectedItem = GetNextItem(_tree.SelectedItem as TreeItem);
+                _tree.SelectedItem = GetNextItem(_tree.SelectedItem as TreeGridItem);
             }
         }
         ExampleLibrary.ExampleInfo SelectedExample
         {
-            get { return (_tree.SelectedItem as TreeItem)?.Tag as ExampleLibrary.ExampleInfo; }
+            get { return (_tree.SelectedItem as TreeGridItem)?.Tag as ExampleLibrary.ExampleInfo; }
         }
 
         private void Tree_SelectionChanged(object sender, EventArgs e)
@@ -121,53 +122,52 @@ namespace TestApp
             }
         }
 
-        TreeItem CreateTreeItem()
+        TreeGridItem CreateTreeItem()
         {
-            var root = new TreeItem();
+            var root = new TreeGridItem();
 
             var examples = ExampleLibrary.Examples.GetList().OrderBy(e => e.Category);
 
-            TreeItem node = null;
+            TreeGridItem node = null;
 
             foreach (var ex in examples)
             {
-                if (node == null || node.Text != ex.Category)
+                if (node == null || node.GetValue(0).ToString() != ex.Category)
                 {
-                    node = new TreeItem { Text = ex.Category };
+                    node = new TreeGridItem (ex.Category);
                     root.Children.Add(node);
                 }
 
-                var exnode = new TreeItem { Text = ex.Title, Tag = ex };
+                var exnode = new TreeGridItem (ex.Title) { Tag = ex };
                 node.Children.Add(exnode);
             }
 
             return root;
         }
-        TreeItem GetNextItem (TreeItem seed)
+        TreeGridItem GetNextItem (TreeGridItem seed)
         {
             if (seed == null)
             {
-                seed = _tree.DataStore as TreeItem;
+                seed = _tree.DataStore as TreeGridItem;
             }
 
             if (seed == _tree.DataStore)
             {
-                seed = seed.Children[0] as TreeItem;
+                seed = seed.Children[0] as TreeGridItem;
             }
             else
             {
-                var parent = seed.Parent as TreeItem;
+                var parent = seed.Parent as TreeGridItem;
 
                 var next = parent.Children.IndexOf(seed) + 1;
 
                 if (next > 0 && next < parent.Children.Count)
                 {
-                    seed = parent.Children[next] as TreeItem;
+                    seed = parent.Children[next] as TreeGridItem;
                 }
                 else
                 {
                     parent.Expanded = false;
-                    _tree.RefreshItem(parent);
                     return GetNextItem(parent);
                 }
             }
@@ -175,8 +175,7 @@ namespace TestApp
             while (seed.Tag == null)
             {
                 seed.Expanded = true;
-                _tree.RefreshItem(seed);
-                seed = seed.Children[0] as TreeItem;
+                seed = seed.Children[0] as TreeGridItem;
             }
 
             return seed;
