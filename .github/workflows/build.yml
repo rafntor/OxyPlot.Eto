@@ -31,13 +31,13 @@ jobs:
         tar --directory=OxyPlot.Eto.Demo/bin/Gtk/Debug/net6.0/linux-x64/publish -cvf OxyPlot.Eto.Demo.Gtk.tar OxyPlot.Eto.Demo
 
     - name: Upload OxyPlot.Eto.Demo.Mac artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: OxyPlot.Eto.Demo.Mac
         path: OxyPlot.Eto.Demo.Mac.tar
 
     - name: Upload OxyPlot.Eto.Demo.Gtk artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: OxyPlot.Eto.Demo.Gtk
         path: OxyPlot.Eto.Demo.Gtk.tar
@@ -62,13 +62,13 @@ jobs:
         dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained OxyPlot.Eto.Demo
     
     - name: Upload OxyPlot.Eto.Demo.Wpf artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: OxyPlot.Eto.Demo.Wpf
         path: OxyPlot.Eto.Demo/bin/Wpf/Debug/net6.0-windows/win-x64/publish/OxyPlot.Eto.Demo.exe
 
     - name: Upload nuget artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: nuget
         path: ./**/bin/Release/*.nupkg
