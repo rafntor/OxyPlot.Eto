@@ -7,6 +7,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "eto.forms"
+      #- dependency-name: "eto.skiadraw"
+      #- dependency-name: "oxyplot.core"
+      #- dependency-name: "oxyplot.skiasharp"
 
   - package-ecosystem: "github-actions"
     directory: "/"
